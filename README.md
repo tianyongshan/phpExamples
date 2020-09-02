@@ -800,3 +800,207 @@ SELECT * from mysql.general_log ORDER BY event_time DESC ;
 如果嫌占用空间，查询完毕及时关了 
 
 ~~~
+
+## mysql json
+
+~~~
+SELECT raw_data->'$.user' as ruser,raw_data->'$.agentsNo' as ragentNo,raw_data FROM `outbound__tell_receiving` WHERE id = 4000000;
+
+SELECT  ROUND(trace->'$.callee')  FROM outbound__abnormal_data_trace WHERE description='接收标记结果' ORDER by id desc LIMIT 2
+
+~~~
+
+##  mysql slave 
+
+~~~
+slave mysql:
+show slave status  ;
+
+Seconds_Behind_Master: NULL异常 0 延时不存在
+以下两项同时为YES 才是正常主从复制
+Slave_IO_Running ：
+Slave_SQL_Running ： 
+
+一项为NO 表示异常：
+查看错误：
+Last_Error：
+详细错误信息  
+
+stop slave ;
+set GLOBAL SQL_SLAVE_SKIP_COUNTER=1;
+start slave ;
+
+
+
+show  slave  status ;
+
+Last_SQL_Error: Relay log read failure: Could not parse relay log event entry. 
+The possible reasons are: the master's binary log is corrupted (
+you can check this by running 'mysqlbinlog' on the binary log), 
+the slave's relay log is corrupted (you can check this by running 'mysqlbinlog' 
+on the relay log), a network problem, or a bug in the master's or slave's MySQL code. 
+If you want to check the master's binary log or slave's relay log, 
+you will be able to know their names by issuing 'SHOW SLAVE STATUS' on this slave.
+
+show  slave  status \G;
+Relay_Master_Log_File:  binlog.000021     //slave库已读取的master的binlog
+Exec_Master_Log_Pos: 676992028           //在slave上已经执行的position位置点
+
+stop slave;
+change master to master_log_file='binlog.000021' , master_log_pos=676992028;
+start slave;
+
+
+~~~
+
+
+## VIEW  view
+~~~
+
+CREATE VIEW Customers
+AS
+SELECT
+order_id,id FROM agreements__paylog GROUP by order_id; 
+
+CREATE OR  REPLACE  VIEW;
+
+
+~~~
+
+
+## quick delete 
+~~~
+DELETE QUICK  FROM  table ;
+
+QUICK  & JOIN 
+
+CREATE TABLE `tmp_ids` (
+	`id` int(11) NOT NULL AUTO_INCREMENT, 
+	PRIMARY KEY (`id`)
+) ENGINE = MyISAM AUTO_INCREMENT = 36768 DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci COMMENT = '新建表模板' ;
+
+INSERT into tmp_ids 
+SELECT 
+	id 
+FROM 
+	`outbound__tell_result` 
+WHERE 
+	id >= 27767 
+	AND id <= 30767;
+
+    DELETE QUICK tell 
+FROM 
+	outbound__tell_result as tell 
+	JOIN tmp_ids as id2 on tell.id = id2.id ;
+
+
+~~~
+
+
+## git  revert 
+
+~~~
+
+git revert 74fd458 ;
+
+1:删除某个提交  
+2:错误的合并了某个分支： 错误合并分支之后，还进行了正常的提交  想删除那次错误的合并，并保留之后的提交
+
+My@My-THINK MINGW64 /e/phpprojects/phpExamples (master)
+$ git revert  104010a231c52a0169c62ae5488e4856d69cddd7
+[master df2b9c7] Revert "add 01"
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 README - 01.md
+
+~~~
+
+
+## grep split large log 
+~~~
+cat  debug_db_20200828.log    | tail -n +1720000 | head -n 100  
+cat  debug_db_20200828.log    | tail -n +1920000 | head -n 100
+
+cat  debug_db_20200828.log    | tail -n +1720000 | head -n 200000 > tmp_0828.log
+
+gzip tmp_0828.log
+
+sz -y tmp_0828.log.gz
+
+~~~
+
+
+## grep awk 
+~~~
+
+cat tmp_sql.log  |grep "SELECT" | awk '{print $3}' |sort -rn |head -5 
+
+
+~~~
+
+
+## nslook  IP address
+~~~
+
+nslookup  XXX.org
+XXX.org
+Address:  101.200.90.180
+ 
+docker03 172.17.1.79 [WORK]$curl ipinfo.io/ip
+101.200.90.180
+
+curl api.ipify.org
+
+public ip :
+
+curl ifconfig.me
+
+curl -4/-6 icanhazip.com
+
+curl ipinfo.io/ip
+
+curl api.ipify.org
+
+curl checkip.dyndns.org
+
+dig +short myip.opendns.com @resolver1.opendns.com
+
+host myip.opendns.com resolver1.opendns.com
+
+curl ident.me
+
+curl bot.whatismyipaddress.com
+
+curl ipecho.net/plain
+
+
+private Ip:
+
+ifconfig -a
+
+ip addr (ip a)
+
+hostname -I | awk '{print $1}'
+
+ip route get 1.2.3.4 | awk '{print $7}' 
+
+~~~
+
+
+## top
+
+~~~
+top 
+c 
+1 
+
+load avg  :  <1 (或者2) 
+             <1*4 (或者2*4) 
+             <1*8 (或者2*8) 
+
+
+top -c -n 1
+
+ps -f -p 11818 
+
+keyword 关键字：What the full process thats running?
+~~~

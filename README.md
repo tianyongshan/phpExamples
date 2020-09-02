@@ -716,6 +716,30 @@ FROM
 	JOIN performance_schema.threads b USING(thread_id) 
 
 
-	JOIN information_schema.processlist c ON b.processlist_id = c.id
+	JOIN information_schema.processlist c ON b.processlist_id = c.id ;
 
-    ~~~
+
+mysql> select max(id) from  debug ;
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id:    2673
+Current database: aibangmang
+
++----------+
+| max(id)  |
++----------+
+| 11921124 |
++----------+
+1 row in set (1.49 sec)
+
+mysql> SELECT b.processlist_id, c.db, a.sql_text, c.command, c.time, c.state FROM performance_schema.events_statements_current a JOIN performance_schema.threads b USING(thread_id)   JOIN information_schema.processlist c ON b.processlist_id = c.id LIMIT 0, 25;
++----------------+------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+------+-----------+
+| processlist_id | db         | sql_text                                                                                                                                                                                                                                                    | command | time | state     |
++----------------+------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+------+-----------+
+|           2673 | aibangmang | select max(id) from  debug                                                                                                                                                                                                                                  | Sleep   |  119 |           |
+|           2677 | aibangmang | SELECT b.processlist_id, c.db, a.sql_text, c.command, c.time, c.state FROM performance_schema.events_statements_current a JOIN performance_schema.threads b USING(thread_id)   JOIN information_schema.processlist c ON b.processlist_id = c.id LIMIT 0, 25 | Query   |    0 | executing |
++----------------+------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+------+-----------+
+ 
+
+
+~~~

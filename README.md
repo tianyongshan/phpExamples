@@ -2117,3 +2117,26 @@ class RedisService{
 }
 
 ~~~
+
+## shell for 
+~~~
+for line in $(cat source.log)
+         do
+         echo  'https://a.com/Order?dir='$line;
+         done 
+
+
+ for line in $(cat rongorder.log)
+         do
+         curl https://zqh.huoyanzichan.com/Home/Order/realDealDirOrder?dir=$line;
+         done
+
+
+~~~
+
+## nohup
+~~~
+
+ nohup php myprog.php > log.txt &
+ 
+~~~

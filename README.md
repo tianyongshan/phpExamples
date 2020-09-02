@@ -2138,5 +2138,48 @@ for line in $(cat source.log)
 ~~~
 
  nohup php myprog.php > log.txt &
- 
+
+~~~
+
+## Vi Vim
+~~~
+    :set enc=utf8
+    :set nu
+    V 全行选中
+    Home  End  
+    2yy  2pp  
+    G 
+    gg  
+    gg=G
+    200G  跳到200行  
+    vim file1 file2 file3
+    CTRL-ww  (  上下左右窗口切换)
+    :vs  拆成左右
+    :sp  拆成上下
+    :%s/foo/word/g   在全局范围(%)查找foo并替换为word，所有出现都会被替换（g）。
+    :5,12s/foo/word/g  在5-12行查找foo并替换为word，所有出现都会被替换（g）。
+    :%s/\\"/ /g
+    替换换行与空格
+    :%s/\s//g 
+    :%s/\r//g 
+    :%s/\n//g
+
+    vimDiff 
+    ★在两个文件之间来回跳转，可以用下列命令序列：Ctrl-w, w
+    ★跳转到下一个diff点：
+    ]c
+    ★ 跳转到前一个diff点：
+    [c
+    把一个差异点中当前文件的内容复制到另一个文件里，可以使用命令：
+    dp （diff "put"）
+    把另一个文件的内容复制到当前行中，可以使用命令：
+    do (diff "get"，之所以不用dg，是因为dg已经被另一个命令占用了，所以用了diff "obtain")
+~~~
+
+## find 
+~~~
+    find  ./ -name "*.json"
+    find  ./ -name "*.php" -mtime 0  今天修改过的
+    find  ./ -name "*.php" -mtime 1  昨天修改过的
+
 ~~~

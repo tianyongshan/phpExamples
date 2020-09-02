@@ -1933,7 +1933,7 @@ E:\phpstudy2020\MySQL\bin>mysqldump.exe  -u root -proot test user > c:\Users\My\
 ~~~
  local master overwrite  remote master 
  git  push  -f -u origin master
-~~
+~~~
 
 ## Redis Service
 ~~~

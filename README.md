@@ -415,5 +415,36 @@ static function getMinId($table ='' ){
         "); 
     }
 
-    
+
 ~~~ 
+
+## export to csv  by  lines 
+
+~~~ 
+public function exportDb($request, $response)
+    { 
+         
+        $filename = "reports.csv";
+        header('Content-type: application/csv');
+        header('Content-Disposition: attachment; filename='.$filename);
+         
+
+        $fp = fopen('php://output', 'w');
+         
+            
+        $header = []; 
+        fputcsv($fp, $header); 
+        // 按page  取数据 取出后按行塞进csv 
+        foreach ($rs as $data) {
+                $fp = fopen('php://output', 'a');
+                fputcsv($fp, $data);
+                 
+        }
+        
+        fclose($fp);
+
+
+    }
+
+
+~~~

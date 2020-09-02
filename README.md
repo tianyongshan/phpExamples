@@ -189,3 +189,85 @@ function reflushIfCanExtend($request, $response){
 
 
 ~~~
+
+## replaceData
+
+~~~ 
+static function  replaceData($Data){
+        $mode = new self();
+
+        $fieldsStr = \model\agreement\Order::transferColomnArrToStr(array_keys($Data));
+        $valuesStr = \model\agreement\Order::transferDbArrToStr($Data);
+         
+        return  $mode->query("
+            REPLACE INTO ".self::$table." (
+                {$fieldsStr}
+            )
+            VALUES {$valuesStr}
+           ");
+}
+
+
+static function  replaceDatas($Datas){
+        $mode = new self();
+        $DatasBak = array_values($Datas);
+        $Data = $DatasBak[0];
+        $fieldsStr = \model\agreement\Order::transferColomnArrToStr(array_keys($Data));
+        $valuesStr = \model\agreement\Order::transferDbArrsToStr($Datas);
+         
+        return  $mode->query("
+            REPLACE INTO ".self::$table." (
+                {$fieldsStr}
+            )
+            VALUES {$valuesStr}
+           ");
+} 
+
+ static function transferColomnArrToStr($colomnsArr){
+        $fieldsStr = "";
+        $i = 1;
+        $totalColomnsNums = count($colomnsArr);
+        foreach($colomnsArr as $field){
+            $fieldsStr .= "   `{$field}`  ";
+            if($i<$totalColomnsNums){
+                $fieldsStr .= "   ,  ";
+            }
+
+            $i++;
+        }
+        return $fieldsStr;
+}
+
+static function transferDbArrToStr($colomnsArr){
+        $fieldsStr = "";
+        $i = 1;
+        $totalColomnsNums = count($colomnsArr);
+        // var_dump($colomnsArr);
+        foreach($colomnsArr as $field){
+            if($i==1){
+                $fieldsStr .= "   (   ";
+            }
+
+            if($field){
+                // var_dump($field);
+                $fieldsStr .= "   '{$field}'  ";
+            }
+            else{
+                $fieldsStr .= "   ''  ";
+            }
+            
+            if($i<$totalColomnsNums){
+                $fieldsStr .= "   ,  ";
+            }
+            
+            else{
+                $fieldsStr .= "   )  ";
+            }
+
+            $i++;
+        }
+        return $fieldsStr;
+}
+
+
+~~~ 

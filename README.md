@@ -448,3 +448,87 @@ public function exportDb($request, $response)
 
 
 ~~~
+
+## mysql  like  loacte 
+
+~~~ 
+可用到索引：
+EXPLAIN SELECT name FROM company WHERE locate('123',name) >0 ;
+用不到索引
+EXPLAIN SELECT id,name FROM company WHERE locate('123',name) >0 ;
+
+mysql> set profiling=1; 
+mysql> SELECT name FROM company WHERE locate('北京',name) >0  order by id  desc  limit 5 ;
+mysql> SELECT name FROM company WHERE name LIKE '%北京%'  order by id  desc  limit 5 ;
+mysql> SHOW PROFILES; 
++----------+------------+-------------------------------------------------------------------------------------+
+| Query_ID | Duration   | Query                                                                               |
++----------+------------+-------------------------------------------------------------------------------------+
+|        1 | 0.00051325 | SELECT name FROM company WHERE locate('北京',name) >0  order by id  desc  limit 5   |
+|        2 | 0.00040625 | SELECT name FROM company WHERE name LIKE '%北京%'  order by id  desc  limit 5       |
++----------+------------+-------------------------------------------------------------------------------------+
+mysql> show profile for query 1;
++--------------------------------+----------+
+| Status                         | Duration |
++--------------------------------+----------+
+| starting                       | 0.000034 |
+| Waiting for query cache lock   | 0.000004 |
+| starting                       | 0.000004 |
+| checking query cache for query | 0.000081 |
+| checking permissions           | 0.000006 |
+| Opening tables                 | 0.000150 |
+| init                           | 0.000026 |
+| System lock                    | 0.000008 |
+| Waiting for query cache lock   | 0.000003 |
+| System lock                    | 0.000014 |
+| optimizing                     | 0.000010 |
+| statistics                     | 0.000017 |
+| preparing                      | 0.000013 |
+| Sorting result                 | 0.000005 |
+| executing                      | 0.000004 |
+| Sending data                   | 0.000061 |
+| end                            | 0.000004 |
+| query end                      | 0.000006 |
+| closing tables                 | 0.000006 |
+| freeing items                  | 0.000009 |
+| Waiting for query cache lock   | 0.000003 |
+| freeing items                  | 0.000019 |
+| Waiting for query cache lock   | 0.000004 |
+| freeing items                  | 0.000003 |
+| storing result in query cache  | 0.000004 |
+| cleaning up                    | 0.000017 |
++--------------------------------+----------+
+mysql> show profile for query 2;
++--------------------------------+----------+
+| Status                         | Duration |
++--------------------------------+----------+
+| starting                       | 0.000063 |
+| Waiting for query cache lock   | 0.000016 |
+| starting                       | 0.000006 |
+| checking query cache for query | 0.000062 |
+| checking permissions           | 0.000017 |
+| Opening tables                 | 0.000013 |
+| init                           | 0.000023 |
+| System lock                    | 0.000008 |
+| Waiting for query cache lock   | 0.000003 |
+| System lock                    | 0.000023 |
+| optimizing                     | 0.000008 |
+| statistics                     | 0.000016 |
+| preparing                      | 0.000012 |
+| Sorting result                 | 0.000004 |
+| executing                      | 0.000004 |
+| Sending data                   | 0.000058 |
+| end                            | 0.000004 |
+| query end                      | 0.000005 |
+| closing tables                 | 0.000007 |
+| freeing items                  | 0.000008 |
+| Waiting for query cache lock   | 0.000003 |
+| freeing items                  | 0.000018 |
+| Waiting for query cache lock   | 0.000003 |
+| freeing items                  | 0.000003 |
+| storing result in query cache  | 0.000004 |
+| cleaning up                    | 0.000019 |
++--------------------------------+----------+
+
+
+~~~

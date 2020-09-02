@@ -783,3 +783,20 @@ show binlog events in 'mysql-bin.000001'  limit 1000 ;
 info 里是实际执行的sql
 
 ~~~ 
+
+
+## 临时查看 所有执行的sql
+~~~
+
+SHOW VARIABLES LIKE '%general_log%' ;
+
+
+SET GLOBAL log_output = 'TABLE';SET GLOBAL general_log = 'ON';  //日志开启
+
+SET GLOBAL log_output = 'TABLE'; SET GLOBAL general_log = 'OFF';  //日志关闭 
+
+SELECT * from mysql.general_log ORDER BY event_time DESC ;
+
+如果嫌占用空间，查询完毕及时关了 
+
+~~~

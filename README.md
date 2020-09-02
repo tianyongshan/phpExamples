@@ -559,3 +559,163 @@ SELECT agreement_id, SUM(money) FROM agreements__paylog GROUP by agreement_id WI
 SELECT SUM(IF(deal_status=1,1,0)),SUM(IF(deal_status=2,1,0)),SUM(IF(deal_status=3,1,0)) FROM company ;
 
 ~~~ 
+
+
+## quick  limit large offset  
+
+~~~ 
+SLOW:
+select 
+	clue.* 
+from 
+	company__third_party_clues_base_info as clue  FORCE INDEX (socialSecrity)
+where 
+	1 
+	AND clue.`deal_status` in (0, 1) 
+order by 
+	clue.socialSecurityNumber desc 
+LIMIT 
+	2750000, 20 ;
+
+
+QUCIK:
+SELECT 
+	l.* 
+FROM 
+	(
+		SELECT 
+			clue.id 
+		FROM 
+			company__third_party_clues_base_info as clue   
+		where 
+			1 
+			AND clue.`deal_status` in (0, 1) 
+		ORDER BY 
+			clue.socialSecurityNumber 
+		LIMIT 
+			2650000, 20
+	) o 
+	JOIN company__third_party_clues_base_info l ON l.id = o.id 
+ORDER BY 
+	l.socialSecurityNumber ;    
+
+
+
+mysql>  SHOW PROFILES;                                                                                                                                                                     
+ mysql> SHOW PROFILES;  
++----------+-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Query_ID | Duration    | Query                                                                                                                                                                                                                                                                                 |
++----------+-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|        1 | 18.07380375 | select clue.* from company__third_party_clues_base_info as clue FORCE INDEX (socialSecrity) where 1 AND clue.`deal_status` in (0, 1) order by clue.socialSecurityNumber desc LIMIT 2700000,10                                                                                         |
+|        2 |  3.07341700 | SELECT l.* FROM ( SELECT clue.id FROM company__third_party_clues_base_info as clue where 1 AND clue.`deal_status` in (0, 1) ORDER BY clue.socialSecurityNumber LIMIT 2660000, 20 ) o JOIN company__third_party_clues_base_info l ON l.id = o.id ORDER BY l.socialSecurityNumber  desc |
++----------+-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+mysql> show profile for query 1;
++--------------------------------+-----------+
+| Status                         | Duration  |
++--------------------------------+-----------+
+| starting                       |  0.000032 |
+| Waiting for query cache lock   |  0.000006 |
+| starting                       |  0.000004 |
+| checking query cache for query |  0.000116 |
+| checking permissions           |  0.000009 |
+| Opening tables                 |  0.000165 |
+| init                           |  0.000063 |
+| System lock                    |  0.000010 |
+| Waiting for query cache lock   |  0.000004 |
+| System lock                    |  0.000018 |
+| optimizing                     |  0.000012 |
+| statistics                     |  0.000017 |
+| preparing                      |  0.000013 |
+| Sorting result                 |  0.000005 |
+| executing                      |  0.000004 |
+| Sending data                   | 18.073170 |
+| end                            |  0.000013 |
+| query end                      |  0.000011 |
+| closing tables                 |  0.000011 |
+| freeing items                  |  0.000048 |
+| Waiting for query cache lock   |  0.000003 |
+| freeing items                  |  0.000023 |
+| Waiting for query cache lock   |  0.000003 |
+| freeing items                  |  0.000003 |
+| storing result in query cache  |  0.000004 |
+| logging slow query             |  0.000030 |
+| cleaning up                    |  0.000011 |
++--------------------------------+-----------+
+27 rows in set, 1 warning (0.00 sec)
+
+mysql> show profile for query 2;
++--------------------------------+----------+
+| Status                         | Duration |
++--------------------------------+----------+
+| starting                       | 0.000041 |
+| Waiting for query cache lock   | 0.000077 |
+| starting                       | 0.000013 |
+| checking query cache for query | 0.000093 |
+| checking permissions           | 0.000004 |
+| checking permissions           | 0.000006 |
+| Opening tables                 | 0.000131 |
+| init                           | 0.000087 |
+| System lock                    | 0.000009 |
+| Waiting for query cache lock   | 0.000003 |
+| System lock                    | 0.000017 |
+| optimizing                     | 0.000005 |
+| optimizing                     | 0.000010 |
+| statistics                     | 0.000051 |
+| preparing                      | 0.000013 |
+| Sorting result                 | 0.000007 |
+| statistics                     | 0.000041 |
+| preparing                      | 0.000008 |
+| Creating tmp table             | 0.000042 |
+| Sorting result                 | 0.000007 |
+| executing                      | 0.000008 |
+| Sending data                   | 0.000027 |
+| executing                      | 0.000003 |
+| Sending data                   | 0.000004 |
+| Creating sort index            | 3.072468 |
+| Creating sort index            | 0.000105 |
+| end                            | 0.000006 |
+| query end                      | 0.000009 |
+| removing tmp table             | 0.000010 |
+| query end                      | 0.000007 |
+| closing tables                 | 0.000004 |
+| removing tmp table             | 0.000006 |
+| closing tables                 | 0.000010 |
+| freeing items                  | 0.000021 |
+| Waiting for query cache lock   | 0.000003 |
+| freeing items                  | 0.000029 |
+| Waiting for query cache lock   | 0.000004 |
+| freeing items                  | 0.000004 |
+| storing result in query cache  | 0.000005 |
+| cleaning up                    | 0.000024 |
++--------------------------------+----------+
+
+
+
+~~~    
+
+
+## SHOW   FULL  PROCESSLIST  
+~~~ 
+SHOW   FULL  PROCESSLIST ;
+~~~ 
+
+
+##  查看 sleep 
+~~~
+注意：有可能是已经执行完的：等待发起新的请求前最后一次的sql
+SELECT 
+	b.processlist_id, 
+	c.db, 
+	a.sql_text, 
+	c.command, 
+	c.time, 
+	c.state 
+FROM 
+	performance_schema.events_statements_current a 
+	JOIN performance_schema.threads b USING(thread_id) 
+
+
+	JOIN information_schema.processlist c ON b.processlist_id = c.id
+
+    ~~~

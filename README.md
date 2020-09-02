@@ -1004,3 +1004,927 @@ ps -f -p 11818
 
 keyword 关键字：What the full process thats running?
 ~~~
+
+## df du  memeory
+~~~
+new03 172.17.22.202 [var]$df -h
+
+new03 172.17.22.202 [var]$df -a
+
+new03 172.17.22.202 [var]$du -sh 
+
+find ./ -type f -size +1G
+
+~~~
+
+
+## method_exists
+~~~
+
+if(method_exists('xx\apiExample', $methodName_checkParams)){
+}
+
+~~~
+
+
+##  preg_match
+
+~~~
+
+//取得指定位址的內容，並儲存至text
+$str=file_get_contents('https://mp.weixin.qq.com/s?__biz=MjM5NTE1OTQyMQ==&mid=2650784873&idx=1&sn=95f9acb28ee67a66a36f12873e813f4d&chksm=bef7a87b8980216dbc6bf93590f00edad6d3fcc612bb98678156ca7ee26e6eb2e46160b22161&scene=27#wechat_redirect');
+
+// <span class="profile_meta_value">Beijing_Daily</span>
+preg_match('/<span.+class=\"?profile_meta_value\"?>*.+span>/u', $str, $match_name);
+
+var_dump($match_name);
+print_r($match_name[0]);
+
+
+~~~
+
+## CallAPI 
+~~~
+
+public  function CallAPIV2($method, $url, $data,$headers,$isHttps=false,$ifDebug=false) {
+        ob_start();
+        $out = fopen('php://output', 'w');
+
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        curl_setopt($curl, CURLOPT_VERBOSE, 1);
+        curl_setopt($curl, CURLOPT_STDERR, $out);
+        if($ifDebug){
+            curl_setopt($curl, CURLOPT_HEADER, 1);
+        }
+
+        switch ($method) {
+            case "GET":
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+                break;
+            case "POST":
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
+                break;
+            case "PUT":
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+                break;
+            case "DELETE":
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+                break;
+        }
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        if($isHttps){
+            //这个是重点,规避ssl的证书检查。
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            // 跳过host验证
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        }
+
+        //curl_setopt($curl,CURLINFO_HEADER_OUT,true);
+
+
+        $response = curl_exec($curl);
+        fclose($out);
+        $debug = ob_get_clean();
+
+        $this->raw_response = $response;
+
+        if($ifDebug){
+            var_dump($debug);
+            echo ("Request-Body(URL Encoded):\r\n" . http_build_query($data) . "\r\n").'<br/>';
+            echo ("Request-Body(Json Encoded):\r\n" . json_encode($data) . "\r\n");
+            var_dump("Response:\r\n" . $response . "\r\n");
+            var_dump(curl_getinfo($curl)) ;
+        }
+
+        // \model\DebugSimple::addData('请求结果',json_encode([
+        //     'Request-Header'=>$debug,
+        //     'Request-Body(URL Encoded)'=>http_build_query($data),
+        //     'Request-Body(Json Encoded)'=>json_encode($data) ,
+        //     'Response'=>$response ,
+        //     'Response-info'=>json_encode(curl_getinfo($curl)) ,
+        // ]));
+
+        $data = json_decode($response,true);
+
+        /* Check for 404 (file not found). */
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        // Check the HTTP Status code
+        switch ($httpCode) {
+            case 200:
+                $error_status = "200: Success";
+                \yoka\Debug::log('请求成功 返回结果',[
+                    $error_status,
+                    $response,
+                    $response->data,
+                    $response['data'],
+                    $response->code,
+                    $data,
+                ]);
+                return ($data);
+                break;
+            case 404:
+                $error_status = "404: API Not found";
+                break;
+            case 500:
+                $error_status = "500: servers replied with an error.";
+                break;
+            case 502:
+                $error_status = "502: servers may be down or being upgraded. Hopefully they'll be OK soon!";
+                break;
+            case 503:
+                $error_status = "503: service unavailable. Hopefully they'll be OK soon!";
+                break;
+            default:
+                $error_status = "Undocumented error: " . $httpCode . " : " . curl_error($curl);
+                break;
+        }
+        curl_close($curl);
+        echo $error_status;
+        die;
+    }
+
+~~~
+
+## Adapter
+
+~~~
+
+interface SmsInterface_{public function sendSms($mobile,$text,$tplName);}
+
+class SmsAdapterOne implements SmsInterface_ {
+    public function sendSms($mobile,$text,$tplName){
+    }
+}
+
+class SmsAdapterTwo implements SmsInterface_ {
+    public function sendSms($mobile,$text,$tplName){
+    }
+}
+
+class sms {
+    private static $sms = null;
+    private static $defaultAdapaer = 'channel_one';
+
+    public static $config = [
+            'channel_one'=>[
+                'name'=>'渠道一',
+                'adaperClass'=>'\model\Sms\SmsAdapterOne',
+            ],
+            'channel_two'=>[
+            'name'=>'渠道二',
+            'adaperClass'=>'\model\Sms\SmsAdapterOne',
+        ],
+    ];
+
+    public static function getInstance($channel)
+    {
+        if(!$channel){
+            $channel = self::$defaultAdapaer;
+        }
+        if(!self::$sms){
+            self::$sms = new self::$config[$channel]['adaperClass']();
+        }
+        return self::$sms;
+    }
+
+    public function __construct($channel='')
+    {
+        self::getInstance($channel);
+    }
+
+    public function send($mobile,$text){
+        self::$sms->sendSms($mobile,$text);
+    }
+
+}
+
+
+$sms = new sms();
+$sms->send('','');
+
+~~~
+
+## debug_backtrace()
+~~~
+\model\DebugSimple::addData('sss',' '.json_encode2(debug_backtrace()));
+
+~~~
+
+## operate__log
+
+~~~
+
+
+
+CREATE TABLE `operate__log` (
+	`id` int(11) NOT NULL AUTO_INCREMENT, 
+	`unique_key_raw` varchar(80) NOT NULL, 
+	`unique_key` varchar(80) NOT NULL DEFAULT '', 
+	`old_content` text NOT NULL, 
+	`new_content` text NOT NULL, 
+	`changed_content` text NOT NULL, 
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	`remark` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, 
+	`update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+	`index_name` varchar(80) NOT NULL DEFAULT '', 
+	`table_name` varchar(32) NOT NULL DEFAULT '', 
+	`state` tinyint(1) NOT NULL DEFAULT '0', 
+	`operator` varchar(16) NOT NULL, 
+	PRIMARY KEY (`id`), 
+	KEY `unique` (`unique_key`, `table_name`)
+) ENGINE = MyISAM AUTO_INCREMENT = 18917 DEFAULT CHARSET = utf8 COMMENT = '操作日志表'
+
+
+static  $config_fields = [
+        'company'=>[
+            'name',
+            'sales_id_rollin', 
+            'sales_id',
+            'sales_id_rollin', 
+            'state', 
+            'can_mail',
+            'local_province',
+            'local_city',
+            'deal_status',
+            'paycard_allow',
+        ], 
+        'company__contact'=>[
+            'company_id',
+            // 'sales_id',
+            'mobile',
+            'email'
+        ], 
+
+    ];
+
+static function  saveOperateLog($infos,$datasInfo){
+        
+       if(
+           empty($infos['index_name'])||
+           empty($datasInfo['new_data'])||
+           empty($infos['table'])||
+           empty($datasInfo['old_data']['id'])
+       ){
+           return \yoka\YsError::error('保存日志 参数缺失1',$datasInfo['new_data']);
+       }
+
+        empty($infos['operator']) && $infos['operator'] = 'system';
+
+        #### 1.读取配置 config
+        if(
+            empty(self::$config_fields[$infos['table']])
+        )
+        {
+            return \yoka\YsError::error('保存日志 参数缺失2',$datasInfo['new_data']);
+        }
+
+        #### 2 生成key
+        $model = new self();
+
+        //    $uniquekeyRes = self::getUniqueKey($infos['table'],$datasInfo['new_data'],$datasInfo['old_data']['id']);
+        //    if(!$uniquekeyRes){
+        //        return \yoka\YsError::error('获取unique key失败');;
+        //    }
+
+        //    $oldModel = $model->fetchOne([
+        //        ####  md5 值
+        //        'unique_key'=>$uniquekeyRes['unique_key'],
+        //        'table_name'=>$infos['table'],
+        //        'state'=>0,
+        //    ]);
+
+        //    #### 木有变更内容
+        //    if($oldModel){
+        //        return true;
+        //    }
+
+        //---3 有变更内容
+        $changeDatas = self::getChangeDatas(
+            $datasInfo['old_data'],
+            $datasInfo['new_data'],
+            self::$config_fields[$infos['table']]
+        );
+        if(empty($changeDatas)){
+            \yoka\Debug::log('no change,continue  ',[]);
+             return  true;
+        }
+
+        return $model->add([
+            'unique_key'=>$infos['index_name']  ,
+            'unique_key_raw'=>$infos['index_name'] ,
+            // 'old_content'=>json_encode2($datasInfo['old_data']),
+            // 'new_content'=>json_encode2($datasInfo['new_data']),
+            'changed_content'=>json_encode2($changeDatas),
+            'index_name'=>$infos['index_name'] ,
+            'table_name'=>$infos['table'],
+            'operator'=>$infos['operator'],
+            'remark'=>$infos['remark'],
+        ]);
+
+    }
+
+    static function getChangeDatas($oldInfo,$newInfo,$fields){
+        $changeContent = [];
+        foreach ($fields as $field){
+            //---要更新的data设置了该key时
+            if(isset($newInfo[$field])){
+                if($newInfo[$field]!=$oldInfo[$field]){
+                    $changeContent[$field]=[
+                        'old'=>$oldInfo[$field],
+                        'new'=>$newInfo[$field],
+                    ];
+                }
+            }
+        }
+        return $changeContent;
+    }
+
+static function checkIfNeedsSaveLogByTable($tableName){
+        if(
+            in_array($tableName,array_keys(\model\OperateLog::$config_fields))
+        ){
+            return true;
+        }
+        else{
+            return  false;
+        }
+					
+    }
+    static function checkIfNeedsSaveLogByDbInfo($tableName,$dbData){
+        $fieldsArr = \model\OperateLog::$config_fields[$tableName];
+        $changedFieldsArr = array_keys($dbData);
+
+        $intersectArr = array_intersect($fieldsArr, $changedFieldsArr);
+        if(!empty($intersectArr)){
+            return true;
+        }
+        else{
+            return  false;
+        }
+					
+    }
+
+~~~
+
+## execute after response 
+
+~~~ 
+	public function respondOK($text = null)
+	{
+		// check if fastcgi_finish_request is callable
+		if (is_callable('fastcgi_finish_request')) {
+			if ($text !== null) {
+				echo $text;
+			}
+			/*
+			 * http://stackoverflow.com/a/38918192
+			 * This works in Nginx but the next approach not
+			 */
+			session_write_close();
+			fastcgi_finish_request();
+	 
+			return;
+		}
+	 
+		ignore_user_abort(true);
+	 
+		ob_start();
+	 
+		if ($text !== null) {
+			echo $text;
+		}
+	 
+		$serverProtocol = filter_input(INPUT_SERVER, 'SERVER_PROTOCOL', FILTER_SANITIZE_STRING);
+		header($serverProtocol . ' 200 OK');
+		// Disable compression (in case content length is compressed).
+		header('Content-Encoding: none');
+		header('Content-Length: ' . ob_get_length());
+	 
+		// Close the connection.
+		header('Connection: close');
+	 
+		ob_end_flush();
+		ob_flush();
+		flush();
+	}
+
+~~~
+
+## chown
+~~~
+new03 172.17.22.202 [aibangmang]$l |grep service__income
+-rw-r----- 1 root  root   8.9K 2020-08-27 10:49:52 service__income_month.frm
+-rw-r----- 1 root  root   761K 2020-08-27 10:49:52 service__income_month.MYD
+-rw-r----- 1 root  root   130K 2020-08-27 10:49:52 service__income_month.MYI
+
+new03 172.17.22.202 [aibangmang]$chown mysql  service__income*
+new03 172.17.22.202 [aibangmang]$l |grep service__income
+-rw-r----- 1 mysql root   8.9K 2020-08-27 10:49:52 service__income_month.frm
+-rw-r----- 1 mysql root   761K 2020-08-27 10:49:52 service__income_month.MYD
+-rw-r----- 1 mysql root   130K 2020-08-27 10:49:52 service__income_month.MYI
+
+new03 172.17.22.202 [aibangmang]$chown mysql:mysql  service__income*
+new03 172.17.22.202 [aibangmang]$l |grep service__income
+-rw-r----- 1 mysql mysql  8.9K 2020-08-27 10:49:52 service__income_month.frm
+-rw-r----- 1 mysql mysql  761K 2020-08-27 10:49:52 service__income_month.MYD
+-rw-r----- 1 mysql mysql  130K 2020-08-27 10:49:52 service__income_month.MYI
+
+
+~~~
+
+## php crawl website data
+~~~
+php parse html class  
+
+$some_link = 'https://xue.youdao.com/';
+$tagName = 'div';
+$attrName = 'class';
+$attrValue = 'content-article';
+
+$dom = new DOMDocument;
+$dom->preserveWhiteSpace = false;
+@$dom->loadHTMLFile($some_link); 
+$html = getTags( $dom, $tagName, $attrName, $attrValue );
+echo $html;
+
+function getTags( $dom, $tagName, $attrName, $attrValue ){
+    $html = '';
+    $domxpath = new DOMXPath($dom);
+    $newDom = new DOMDocument;
+    $newDom->formatOutput = true;
+
+    $filtered = $domxpath->query("//$tagName" . '[@' . $attrName . "='$attrValue']");
+    // $filtered =  $domxpath->query('//div[@class="className"]');
+    // '//' when you don't know 'absolute' path
+
+    // since above returns DomNodeList Object
+    // I use following routine to convert it to string(html); copied it from someone's post in this site. Thank you.
+    $i = 0;
+    while( $myItem = $filtered->item($i++) ){
+        $node = $newDom->importNode( $myItem, true );    // import node
+        $newDom->appendChild($node);                    // append node
+    }
+    $html = ($newDom->saveHTML());
+    return $html;
+}
+
+UTF-8 :
+
+$some_link = 'https://xue.youdao.com/';
+$profile = file_get_contents($some_link);
+
+
+// $profile = '<p>イリノイ州シカゴにて、アイルランド系の家庭に、9</p>';
+$dom = new DOMDocument();
+$dom->loadHTML(mb_convert_encoding($profile, 'HTML-ENTITIES', 'UTF-8'));
+
+// echo $dom->saveHTML();
+
+$tags = $dom->getElementsByTagName('img');
+
+foreach ($tags as $tag) {
+    var_dump($tag);
+    //    echo $tag->getAttribute('href').' | '.$tag->nodeValue."\n";
+}
+
+
+
+~~~
+
+
+## Extract numbers from a string
+~~~
+
+
+$str = 'In My Cart : 11 items';
+$int = (int) filter_var($str, FILTER_SANITIZE_NUMBER_INT);
+
+
+
+~~~
+
+## PARTITIONS   EXAMPLE
+~~~
+ CREATE TABLE `company__third_party_clues_base_info` (
+	`id` int(11) NOT NULL AUTO_INCREMENT, 
+	`third_party_clues_id` int(11) DEFAULT NULL, 
+	`third_party_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`companyName` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`socialSecurityNumber` int(11) NOT NULL DEFAULT '0', 
+	`company_id` int(11) NOT NULL DEFAULT '0', 
+	`deal_status` int(6) NOT NULL DEFAULT '0', 
+	`companySize` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`entType` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`officialweb` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`city` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`city_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`regCapital` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`arInsuranceNumber` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`legalPerson` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`regDate` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`creditNo` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAddr` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAuthority` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry_id` int(10) NOT NULL DEFAULT '0', 
+	`openStatus` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`related_company_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_contacts_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_companys_emplyee_nums` int(11) NOT NULL DEFAULT '0', 
+	`state` int(11) NOT NULL, 
+	`urlRecords` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	`update_time` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP, 
+	`remark` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`del_flag` int(11) NOT NULL, 
+	PRIMARY KEY (`id`), 
+	UNIQUE KEY `thirds_ids` (`third_party_id`), 
+	KEY `third_party_clues_id` (`third_party_clues_id`), 
+	KEY `companyName` (`companyName`), 
+	KEY `socialSecrity` (`socialSecurityNumber`), 
+	KEY `related_company_nums` (`related_company_nums`), 
+	KEY `deal_status` (`deal_status`), 
+	KEY `company_id` (
+		`related_companys_emplyee_nums`
+	) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 4186208 DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci COMMENT = '第三方线索表基础信息表' 
+
+
+CREATE TABLE `company__third_party_clues_base_info2` (
+	`id` int(11) NOT NULL AUTO_INCREMENT ,
+    `third_party_clues_id` int(11) DEFAULT NULL, 
+	`third_party_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`companyName` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`socialSecurityNumber` int(11) NOT NULL DEFAULT '0', 
+	`company_id` int(11) NOT NULL DEFAULT '0', 
+	`deal_status` int(6) NOT NULL DEFAULT '0', 
+	`companySize` int(11) NOT NULL DEFAULT '0', 
+	`entType` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`officialweb` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`city` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`city_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`regCapital` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`arInsuranceNumber` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`legalPerson` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`regDate` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`creditNo` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAddr` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAuthority` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry_id` int(10) NOT NULL DEFAULT '0', 
+	`openStatus` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`related_company_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_contacts_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_companys_emplyee_nums` int(11) NOT NULL DEFAULT '0', 
+	`state` int(11) NOT NULL, 
+	`urlRecords` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	`update_time` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP, 
+	`remark` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`del_flag` int(11) NOT NULL, 
+	PRIMARY KEY (
+		`id`, deal_status, companySize, socialSecurityNumber
+	), 
+	KEY `thirds_ids` (`third_party_id`), 
+	KEY `third_party_clues_id` (`third_party_clues_id`), 
+	KEY `companyName` (`companyName`), 
+	KEY `socialSecrity` (`socialSecurityNumber`), 
+	KEY `related_company_nums` (`related_company_nums`), 
+	KEY `deal_status` (`deal_status`), 
+	KEY `company_id` (
+		`related_companys_emplyee_nums`
+	) USING BTREE
+) ENGINE = MyISAM DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci PARTITION BY RANGE COLUMNS(
+	deal_status, companySize, socialSecurityNumber
+) (
+	PARTITION p0 
+	VALUES 
+		LESS THAN (1, 1, 1), 
+		PARTITION p1 
+	VALUES 
+		LESS THAN (2, 1000, 1000), 
+		PARTITION p2 
+	VALUES 
+		LESS THAN (3, 3000, 3000), 
+		PARTITION p3 
+	VALUES 
+		LESS THAN (MAXVALUE, MAXVALUE, MAXVALUE)
+);
+
+ CREATE TABLE `company__third_party_clues_base_info_p` (
+	`id` int(11) NOT NULL AUTO_INCREMENT, 
+	`third_party_clues_id` int(11) NOT NULL, 
+	`third_party_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`companyName` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`socialSecurityNumber` int(11) NOT NULL DEFAULT '0', 
+	`company_id` int(11) NOT NULL DEFAULT '0', 
+	`deal_status` int(6) NOT NULL DEFAULT '0', 
+	`companySize` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`entType` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`officialweb` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`city` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`city_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`regCapital` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`arInsuranceNumber` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`legalPerson` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`regDate` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`creditNo` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAddr` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAuthority` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry_id` int(10) NOT NULL DEFAULT '0', 
+	`openStatus` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`related_company_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_contacts_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_companys_emplyee_nums` int(11) NOT NULL DEFAULT '0', 
+	`state` int(11) NOT NULL, 
+	`urlRecords` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	`update_time` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP, 
+	`remark` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`del_flag` int(11) NOT NULL, 
+	KEY `companyName` (`companyName`), 
+	KEY `socialSecrity` (`socialSecurityNumber`), 
+	KEY `related_company_nums` (`related_company_nums`), 
+	KEY `deal_status` (`deal_status`), 
+	KEY `company_id` (
+		`related_companys_emplyee_nums`
+	) USING BTREE, 
+	KEY `id` (`id`) USING BTREE, 
+	KEY `thirds_ids` (`third_party_id`) USING BTREE, 
+	KEY `third_id` (`third_party_clues_id`) USING BTREE
+) ENGINE = MyISAM DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci COMMENT = '第三方线索表基础信息表' 
+/*!50100 PARTITION BY KEY (deal_status,companySize,socialSecurityNumber) PARTITIONS 100 */
+ 
+
+CREATE TABLE `company__third_party_clues_base_info_p2` (
+	`id` int(11) NOT NULL AUTO_INCREMENT, 
+	`third_party_clues_id` int(11) NOT NULL, 
+	`third_party_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`companyName` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`socialSecurityNumber` int(11) NOT NULL DEFAULT '0', 
+	`company_id` int(11) NOT NULL DEFAULT '0', 
+	`deal_status` int(6) NOT NULL DEFAULT '0', 
+	`companySize` int(11) NOT NULL DEFAULT '0', 
+	`entType` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`officialweb` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`city` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`city_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`regCapital` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`arInsuranceNumber` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`legalPerson` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`regDate` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`creditNo` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAddr` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAuthority` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry_id` int(10) NOT NULL DEFAULT '0', 
+	`openStatus` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`related_company_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_contacts_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_companys_emplyee_nums` int(11) NOT NULL DEFAULT '0', 
+	`state` int(11) NOT NULL, 
+	`urlRecords` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	`update_time` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP, 
+	`remark` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`del_flag` int(11) NOT NULL, 
+	KEY `companyName` (`companyName`), 
+	KEY `socialSecrity` (`socialSecurityNumber`), 
+	KEY `related_company_nums` (`related_company_nums`), 
+	KEY `deal_status` (`deal_status`), 
+	KEY `company_id` (
+		`related_companys_emplyee_nums`
+	) USING BTREE, 
+	KEY `id` (`id`) USING BTREE, 
+	KEY `thirds_ids` (`third_party_id`) USING BTREE, 
+	KEY `third_id` (`third_party_clues_id`) USING BTREE
+) ENGINE = MyISAM DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci COMMENT = '第三方线索表基础信息表' PARTITION BY RANGE COLUMNS(
+	deal_status, socialSecurityNumber, 
+	companySize
+) 
+
+(
+	PARTITION p0 
+	VALUES 
+		LESS THAN (1, 1, 1), 
+		PARTITION p1 
+	VALUES 
+		LESS THAN (1, 10, 10), 
+		PARTITION p2 
+	VALUES 
+		LESS THAN (1, 50, 50), 
+		PARTITION p3 
+	VALUES 
+		LESS THAN (2, 100, 100), 
+		PARTITION p4 
+	VALUES 
+		LESS THAN (3, 1000, 1000), 
+		PARTITION p5 
+	VALUES 
+		LESS THAN (MAXVALUE, MAXVALUE,MAXVALUE)
+) 
+
+mysql> SHOW PROFILES;   ;                                                                                                                                                                  
++----------+------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Query_ID | Duration   | Query                                                                                                                                                                                               |
++----------+------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|       17 | 1.87572675 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2    WHERE   companySize > 100                                                            |
+|       18 | 2.07466675 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2    WHERE   companySize > 100 OR socialSecurityNumber>100                                |
+|       19 | 2.20662050 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info     WHERE   companySize > 100 OR socialSecurityNumber>100                                  |
+|       20 | 2.20369700 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info     WHERE   companySize > 200 OR socialSecurityNumber> 200                                 |
+|       21 | 1.97166500 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2     WHERE   companySize > 200 OR socialSecurityNumber> 200                              |
+|       22 | 2.22661275 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info     WHERE   companySize > 500 OR socialSecurityNumber> 500                                 |
+|       23 | 2.06996400 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2     WHERE   companySize > 500 OR socialSecurityNumber> 500                              |
+|       24 | 0.00218650 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2     WHERE  ( companySize > 500 OR socialSecurityNumber> 500 ) AND deal_status = 1       |
+|       25 | 0.00185900 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info     WHERE  ( companySize > 500 OR socialSecurityNumber> 500 ) AND deal_status = 1          |
+|       26 | 2.27813200 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info     WHERE  ( companySize > 500 OR socialSecurityNumber> 500 ) AND deal_status in (1,0)     |
+|       27 | 2.00928900 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2      WHERE  ( companySize > 500 OR socialSecurityNumber> 500 ) AND deal_status in (1,0) |
+|       28 | 2.07613225 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2      WHERE  ( companySize > 100 OR socialSecurityNumber> 100 ) AND deal_status in (1,0) |
+|       29 | 2.33124600 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info      WHERE  ( companySize > 100 OR socialSecurityNumber> 100 ) AND deal_status in (1,0)    |
+|       30 | 2.30497525 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info      WHERE  ( companySize > 100 OR socialSecurityNumber> 100 ) AND deal_status in (1,0)    |
+|       31 | 2.04205750 | SELECT  count(1), deal_status,companySize,socialSecurityNumber FROM company__third_party_clues_base_info_p2      WHERE  ( companySize > 100 OR socialSecurityNumber> 100 ) AND deal_status in (1,0) |
++----------+------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+15 rows in set, 1 warning (0.00 sec)  
+
+
+SELECT COUNT(1) FROM company__third_party_clues_base_info_p2 PARTITION (p0) ;
+SELECT 
+	* 
+FROM 
+	information_schema.partitions 
+WHERE 
+	TABLE_SCHEMA = 'aibangmang' 
+	AND TABLE_NAME = 'company__third_party_clues_base_info_p2' 
+	AND PARTITION_NAME IS NOT NULL ;
+
+
+~~~
+
+## MERGE 
+~~~
+
+CREATE TABLE `company__third_party_clues_base_info1` (
+	`id` int(11) NOT NULL AUTO_INCREMENT, 
+	`third_party_clues_id` int(11) DEFAULT NULL, 
+	`third_party_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`companyName` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`socialSecurityNumber` int(11) NOT NULL DEFAULT '0', 
+	`company_id` int(11) NOT NULL DEFAULT '0', 
+	`deal_status` int(6) NOT NULL DEFAULT '0', 
+	`companySize` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`entType` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`officialweb` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`city` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`city_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`regCapital` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`arInsuranceNumber` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`legalPerson` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`regDate` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`creditNo` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAddr` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAuthority` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry_id` int(10) NOT NULL DEFAULT '0', 
+	`openStatus` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`related_company_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_contacts_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_companys_emplyee_nums` int(11) NOT NULL DEFAULT '0', 
+	`state` int(11) NOT NULL, 
+	`urlRecords` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	`update_time` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP, 
+	`remark` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`del_flag` int(11) NOT NULL, 
+	PRIMARY KEY (`id`), 
+	UNIQUE KEY `thirds_ids` (`third_party_id`), 
+	KEY `third_party_clues_id` (`third_party_clues_id`), 
+	KEY `companyName` (`companyName`), 
+	KEY `socialSecrity` (`socialSecurityNumber`), 
+	KEY `related_company_nums` (`related_company_nums`), 
+	KEY `deal_status` (`deal_status`), 
+	KEY `company_id` (
+		`related_companys_emplyee_nums`
+	) USING BTREE
+) ENGINE = MyISAM   DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci COMMENT = '第三方线索表基础信息表'
+
+CREATE TABLE `company__third_party_clues_base_info_all` (
+	`id` int(11) NOT NULL AUTO_INCREMENT, 
+	`third_party_clues_id` int(11) DEFAULT NULL, 
+	`third_party_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`companyName` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`socialSecurityNumber` int(11) NOT NULL DEFAULT '0', 
+	`company_id` int(11) NOT NULL DEFAULT '0', 
+	`deal_status` int(6) NOT NULL DEFAULT '0', 
+	`companySize` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`entType` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`officialweb` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`province_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`city` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`city_id` varchar(16) COLLATE utf8_unicode_ci NOT NULL, 
+	`regCapital` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`arInsuranceNumber` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`legalPerson` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`regDate` varchar(80) COLLATE utf8_unicode_ci NOT NULL, 
+	`creditNo` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAddr` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`regAuthority` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`parent_industry_id` int(10) NOT NULL DEFAULT '0', 
+	`openStatus` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`related_company_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_contacts_nums` int(11) NOT NULL DEFAULT '0', 
+	`related_companys_emplyee_nums` int(11) NOT NULL DEFAULT '0', 
+	`state` int(11) NOT NULL, 
+	`urlRecords` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', 
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	`update_time` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP, 
+	`remark` varchar(200) COLLATE utf8_unicode_ci NOT NULL, 
+	`del_flag` int(11) NOT NULL, 
+	PRIMARY KEY (`id`), 
+	UNIQUE KEY `thirds_ids` (`third_party_id`), 
+	KEY `third_party_clues_id` (`third_party_clues_id`), 
+	KEY `companyName` (`companyName`), 
+	KEY `socialSecrity` (`socialSecurityNumber`), 
+	KEY `related_company_nums` (`related_company_nums`), 
+	KEY `deal_status` (`deal_status`), 
+	KEY `company_id` (
+		`related_companys_emplyee_nums`
+	) USING BTREE
+)  DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci COMMENT = '第三方线索表基础信息表'
+
+ENGINE = MERGE 
+UNION 
+	=(company__third_party_clues_base_info11, company__third_party_clues_base_info12,company__third_party_clues_base_info13,company__third_party_clues_base_info14,company__third_party_clues_base_info15) INSERT_METHOD = LAST 
+
+ INSERT  into  company__third_party_clues_base_info14  
+
+SELECT  * FROM  company__third_party_clues_base_info  
+WHERE id >=3000000 AND id <4000000  ;
+
+
+数据合起来了，但是还是占用了一定的空间
+SELECT
+  TABLE_NAME AS `Table`,
+  ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024) AS `Size (MB)`
+FROM
+  information_schema.TABLES
+WHERE
+    TABLE_SCHEMA = "aibangmang"
+  AND
+    TABLE_NAME = "company__third_party_clues_base_info_all"
+ORDER BY
+  (DATA_LENGTH + INDEX_LENGTH)
+DESC  ;
+
+~~~
+
+
+## INSERT IGNORE 
+
+~~~
+INSERT IGNORE INTO `transcripts`
+SET `ensembl_transcript_id` = 'ENSORGT00000000001',
+`transcript_chrom_start` = 12345,
+`transcript_chrom_end` = 12678;
+
+
+~~~
+
+## SQL_NO_CACHE
+~~~
+SELECT SQL_NO_CACHE id FROM company
+
+~~~
+
+## mysqldump
+
+~~~
+shell :
+mysqldump -u root -proot  test user  > c:\temp\my_database.sql ;
+
+ windows ;
+ mysqldump.exe  -u root -proot test user > c:\Users\My\Desktop\my_database.sql   
+
+
+E:\phpstudy2020\MySQL\bin>mysqldump.exe  -u root -proot test user > c:\Users\My\Desktop\my_database.sql  
+
+~~~

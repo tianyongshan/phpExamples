@@ -1934,3 +1934,202 @@ E:\phpstudy2020\MySQL\bin>mysqldump.exe  -u root -proot test user > c:\Users\My\
  local master overwrite  remote master 
  git  push  -f -u origin master
 ~~
+
+## Redis Service
+~~~
+
+class RedisService{
+     /**
+
+     ├── cache_str.php	// 缓存字符串
+     ├── counter.php		// 计数器
+     ├── optimistic		// 乐观锁
+     ├── pessimistic		// 悲观锁
+     ├── queue.php		// 队列
+     ├── README.md
+     ├── subscibe		// 订阅
+     └── top.php			// 排行
+
+      */
+     protected $redis =  '';
+     public function __construct()
+     {
+         $this->redis = new Redis();
+         $this->redis->connect('127.0.0.1',6379);
+     }
+     /**
+     缓存字符串 缓存一维数组 二维数组
+      */
+     public function redisCacheStr(){
+         $redis = new Redis();
+         $redis->connect('127.0.0.1');
+         $strCacheKey = 'adolph';
+         $arrData = array(
+             'name' => 'adolph',
+             'age'  => '23',
+             'sex'  => '男')
+
+         ;
+         $redis->set($strCacheKey,json_encode($arrData));
+         $redis->expire($strCacheKey,60);
+         $json_data = $redis->get($strCacheKey);
+         $data = json_decode($json_data);
+         // 这里要删除,防止重复的Key
+         $redis->del($strCacheKey);
+         var_dump($data);
+         $arrWebSite = array(
+             'google'=>array(
+                 'google.com',
+                 'google.com.hk'
+             )
+         );
+         $result = $redis->hSet($strCacheKey,'google',json_encode($arrWebSite['google']));
+         $json_data = $redis->hGet($strCacheKey,'google');
+         var_dump(json_decode($json_data));
+     }
+     /**
+     计数器
+      */
+     public function redisCounter(){
+         $redis = new Redis();
+         $redis->connect('127.0.0.1',6379);
+         $counter = 'counts';
+         $redis->set($counter,0);
+         $redis->incr($counter);
+         $redis->incr($counter);
+         $redis->incr($counter);
+         $strNowCount = $redis->get($counter);
+         echo '-------- 当前数量为:' . $strNowCount . ' -------';
+
+     }
+     /**
+      * 获取锁[悲观锁]
+      * @param string $key   关键字
+      * @param int $expire   超时时间
+      * @return bool
+      */
+     public function lock($key = '',$expire = 5)
+     {
+         // 设置值,如果有值就返回失败.  [set if not exists]
+         $is_lock = $this->redis->setnx($key,time() + $expire);
+         // 有值判断时间.
+         if(!$is_lock)
+         {
+             // 获取有效期.
+             $lock_time = $this->redis->get($key);
+             // 判断有效期,当前时间如果大于设置的日期  就过期了
+             if(time() > $lock_time)
+             {
+                 // 删除键 并且重新设值.
+                 $this->unlock($key);
+                 $is_lock = $this->redis->setnx($key,time() + $expire);
+             }
+         }
+         return $is_lock ? true : false;
+     }
+     public function unlock($key = '')
+     {
+         return $this->redis->del($key);
+     }
+     /**
+     乐观锁
+      */
+     public function optLock(){
+         // 乐观锁
+         // 解释：乐观锁(Optimistic Lock), 顾名思义，就是很乐观。
+         // 每次去拿数据的时候都认为别人不会修改，所以不会上锁。
+         // watch命令会监视给定的key，当exec时候如果监视的key从调用watch后发生过变化，则整个事务会失败。
+         // 也可以调用watch多次监视多个key。这样就可以对指定的key加乐观锁了。
+         // 注意watch的key是对整个连接有效的，事务也一样。
+         // 如果连接断开，监视和事务都会被自动清除。
+         // 当然了exec，discard，unwatch命令都会清除连接中的所有监视。
+         $redis = new Redis();
+         $redis->connect('127.0.0.1',6379);
+         $strKey = 'pessimistic';
+         $redis->set($strKey,10);
+         $age = $redis->get($strKey);
+         echo '------ Current Age:' . $age . "\n";
+         $redis->watch($strKey);
+         // 开启事务
+         $redis->multi();
+         $redis->set($strKey,30);
+         $redis->set($strKey,20);
+         // 休息30秒让其他去操作
+         sleep(30);
+         $redis->exec();
+         $age = $redis->get($strKey);
+         echo "----- Current Age:{$age}\n";
+
+     }
+     /**
+     排行
+      */
+     public  function Top(){
+         $redis = new Redis();
+         $redis->connect('127.0.0.1',6379);
+         $top_str = 'top10';
+         // 有序集
+         $redis->zAdd($top_str,'50',json_encode(array('name'=>'tom')));
+         $redis->zAdd($top_str,'60',json_encode(array('name'=>'adolph')));
+         $redis->zAdd($top_str,'40',json_encode(array('name'=>'blank')));
+         $dataOne = $redis->zRevRange($top_str,0,-1,true);
+         echo '从大到小：';
+         print_r($dataOne);
+         $dataTwo = $redis->zRange($top_str,0,-1,true);
+         echo '从小到大:';
+         print_r($dataTwo);
+     }
+     /**
+     队列
+      */
+     public function redisQueue(){
+         $redis = new Redis();
+         $redis->connect('127.0.0.1',6379);
+         $strQueueName = 'queue';
+         // 进队列.
+         $redis->rPush($strQueueName,json_encode(array('uid'=>1,'name'=>'Job')));
+         $redis->rPush($strQueueName,json_encode(array('uid'=>2,'name'=>'Tom')));
+         $redis->rPush($strQueueName,json_encode(array('uid'=>3,'name'=>'John')));
+         echo "------ 进队列成功 ------";
+         $strCount = $redis->lRange($strQueueName,0,-1);
+         echo '当该队列数据为:' . count($strCount);
+         $queue = $redis->lPop($strQueueName);
+         echo '获取一个队列';
+         $strCount = $redis->lRange($strQueueName,0,-1);
+         echo '当前队列为:' . count($strCount);
+     }
+     /**
+     订阅客户端[消费端]
+      */
+     public function redisSubscribeClient(){
+         ini_set('default_socket_timeout',-1);
+         $redis = new Redis();
+         $redis->connect('127.0.0.1',6379);
+         $strChannel = 'adolph_channel';
+         echo '开始订阅' . $strChannel . '频道';
+         $redis->subscribe(array($strChannel),function($redis,$channel,$msg){
+             print_r(array(
+                 'redis'=>$redis,
+                 'channel'=>$channel,
+                 'msg'=>$msg
+             ));
+         });
+     }
+     /**
+     订阅服务端
+      */
+     public function redisSubscribeServer(){
+         ini_set('default_socket_timeout',-1);
+         $redis  = new Redis();
+         $redis->connect('127.0.0.1',6379);
+         $strChannel = 'adolph_channel';
+         $redis->publish($strChannel,'订阅频道,来自server');
+         echo '消息推送成功';
+         // 关闭redis
+         $redis->close();
+     }
+
+
+}
+
+~~~

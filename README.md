@@ -365,5 +365,55 @@ static function  insertOnDuplocates($Datas,$unqiueField){
         }
         return $fieldsStr;
     }
+
+~~~ 
+
+## basic model actions
+~~~ 
+static function getMinId($table ='' ){
+        if(empty($table)){
+            $table =self::$table;
+        }
+        $model = new self();
+        $resModel =$model->fetchOne("SELECT id FROM  ".$table);
+        return  $resModel?$resModel->id:0;
+    }
+
+    static function getMaxId($table = ''){
+        if(empty($table)){
+            $table =self::$table;
+        }
+        $model = new self();
+        $resModel =$model->fetchOne("SELECT max(id) as  id   FROM    ".$table);
+        return  $resModel?$resModel->id:0;
+    } 
+
+    
+    static function  addData($data){
+        $model = new self();
+        
+        return  $model->add($data,true);
+
+    }
+
+    static function  updateData($data){
+        $model = new self(); 
+        return  $model->update($data,null,true);
+
+    }
+
+
+    static function getByIds($minId,$maxId,$field='*',$table= '' ){
+        if(empty($table)){
+            $table =self::$table;
+        }
+        $model = new self();
+        return $model->fetchAll("SELECT {$field} from ".$table."
+                    WHERE id >=  {$minId}
+                    AND id <  {$maxId} 
+                    
+        "); 
+    }
+
     
 ~~~ 

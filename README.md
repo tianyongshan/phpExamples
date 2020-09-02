@@ -83,6 +83,35 @@
         }
 
     }
+
+
+     function killMysqlByKeyword($request, $response)
+    {
+
+        $model = new \model\Member();
+        $allLists = $model->query("SHOW FULL PROCESSLIST", true);
+        if(!trim($request->keyword)){
+            return ;
+        }
+        
+        $model = new \model\Company();
+        $rows = $model->query("SHOW processlist", true);
+        foreach ($rows as $row) {
+        
+            if(strpos($row['Info'],trim($request->keyword)) !== false){ 
+                \yoka\Debug::log('锁住了', ['Command' => $row['Command'], 'State' => $row['State'],
+                    'Time' => $row['Time'], 'Info' => $row['Info'], 'run' => "KILL {$row['Id']}", ]);
+                $res = $model->query("KILL {$row['Id']}", true);
+                \yoka\Debug::log('res', $res);
+            }else{
+                
+            } 
+
+        }
+
+    }
+    
+
 ~~~
 
 ## 本地常驻
@@ -109,4 +138,54 @@ while (1) {
 	echo $n, ' spend ', microtime(true) - $t1, "\n";
 
 }
+~~~  
+
+## reflush by ids
+
+~~~
+
+ function getMinId(){
+        $model = new self();
+        $resModel =$model->fetchOne("SELECT id FROM `agreements__plan` ");
+        return  $resModel?$resModel->id:0;
+ }
+
+ function getDailyRunedTimes($actionName){
+        $cache = \yoka\Cache::getInstance('aibangmang');
+        $cacheKey = $actionName.'_runed_time_' . date('Ymd');
+        $times = $cache->get($cacheKey);
+        return $times?:1;   
+}
+
+function setDailyRunedTimes($actionName,$page,$maxPage){
+        $cache = \yoka\Cache::getInstance('aibangmang');
+        $cacheKey = $actionName.'_runed_time_' . date('Ymd');
+        if($page>$maxPage){
+            $page =1 ;
+        }
+        $times = $cache->set($cacheKey,$page);
+        return $times?:1;   
+}
+
+function reflushIfCanExtend($request, $response){
+        $beginTime = microtime(true);
+
+        $limit = $request->limit?:500;
+        $page =  self::getDailyRunedTimes('reflushIfCanExtend');
+        if($request->page>0){
+            $page =  $request->page ;
+        }
+         
+        $minId = \model\AgreementsPlan::getMinId();
+        $minId = ($page-1)*$limit+$minId;
+
+         // 业务逻辑
+
+        self::setDailyRunedTimes('reflushIfCanExtend',$page+1,25);
+
+        $endTime = microtime(true);
+        $this->crontabSuccess(['msg'=>'更新完成', 'time'=>$endTime-$beginTime]);
+}
+
+
 ~~~

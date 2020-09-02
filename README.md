@@ -1938,28 +1938,16 @@ E:\phpstudy2020\MySQL\bin>mysqldump.exe  -u root -proot test user > c:\Users\My\
 ## Redis Service
 ~~~
 
-class RedisService{
-     /**
-
-     ├── cache_str.php	// 缓存字符串
-     ├── counter.php		// 计数器
-     ├── optimistic		// 乐观锁
-     ├── pessimistic		// 悲观锁
-     ├── queue.php		// 队列
-     ├── README.md
-     ├── subscibe		// 订阅
-     └── top.php			// 排行
-
-      */
+class RedisService{ 
      protected $redis =  '';
      public function __construct()
      {
          $this->redis = new Redis();
          $this->redis->connect('127.0.0.1',6379);
      }
-     /**
-     缓存字符串 缓存一维数组 二维数组
-      */
+      
+     //缓存字符串 缓存一维数组 二维数组
+       
      public function redisCacheStr(){
          $redis = new Redis();
          $redis->connect('127.0.0.1');
@@ -1987,9 +1975,7 @@ class RedisService{
          $json_data = $redis->hGet($strCacheKey,'google');
          var_dump(json_decode($json_data));
      }
-     /**
-     计数器
-      */
+     //计数器
      public function redisCounter(){
          $redis = new Redis();
          $redis->connect('127.0.0.1',6379);
@@ -2002,12 +1988,12 @@ class RedisService{
          echo '-------- 当前数量为:' . $strNowCount . ' -------';
 
      }
-     /**
-      * 获取锁[悲观锁]
-      * @param string $key   关键字
-      * @param int $expire   超时时间
-      * @return bool
-      */
+     //
+      // 获取锁[悲观锁]
+      ///@param string $key   关键字
+     // @param int $expire   超时时间
+      // @return bool
+      //
      public function lock($key = '',$expire = 5)
      {
          // 设置值,如果有值就返回失败.  [set if not exists]
@@ -2031,9 +2017,9 @@ class RedisService{
      {
          return $this->redis->del($key);
      }
-     /**
-     乐观锁
-      */
+      
+     //乐观锁
+      
      public function optLock(){
          // 乐观锁
          // 解释：乐观锁(Optimistic Lock), 顾名思义，就是很乐观。
@@ -2061,9 +2047,9 @@ class RedisService{
          echo "----- Current Age:{$age}\n";
 
      }
-     /**
-     排行
-      */
+     
+     //排行
+     
      public  function Top(){
          $redis = new Redis();
          $redis->connect('127.0.0.1',6379);
@@ -2079,9 +2065,8 @@ class RedisService{
          echo '从小到大:';
          print_r($dataTwo);
      }
-     /**
-     队列
-      */
+     
+    // 队列 
      public function redisQueue(){
          $redis = new Redis();
          $redis->connect('127.0.0.1',6379);
@@ -2098,9 +2083,9 @@ class RedisService{
          $strCount = $redis->lRange($strQueueName,0,-1);
          echo '当前队列为:' . count($strCount);
      }
-     /**
-     订阅客户端[消费端]
-      */
+    
+     //订阅客户端[消费端]
+       
      public function redisSubscribeClient(){
          ini_set('default_socket_timeout',-1);
          $redis = new Redis();
@@ -2115,9 +2100,8 @@ class RedisService{
              ));
          });
      }
-     /**
-     订阅服务端
-      */
+     
+     //订阅服务端 
      public function redisSubscribeServer(){
          ini_set('default_socket_timeout',-1);
          $redis  = new Redis();

@@ -557,6 +557,191 @@ SELECT agreement_id, SUM(money) FROM agreements__paylog GROUP by agreement_id WI
 ## SUM IF  
 ~~~ 
 SELECT SUM(IF(deal_status=1,1,0)),SUM(IF(deal_status=2,1,0)),SUM(IF(deal_status=3,1,0)) FROM company ;
+SELECT 
+	 
+	SUM(
+		IF(
+			companySize < 100 
+			AND socialSecurityNumber < 100 
+			AND province = '陕西省', 
+			1, 
+			0
+		)
+	) as 'less than 100 陕西省', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 100 
+					AND companySize < 300
+				) 
+				OR (
+					socialSecurityNumber >= 100 
+					AND socialSecurityNumber < 300
+				)
+			) 
+			AND province = '陕西省', 
+			1, 
+			0
+		)
+	) as '100-300 陕西省', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 300 
+					AND companySize < 500
+				) 
+				OR (
+					socialSecurityNumber >= 300 
+					AND socialSecurityNumber < 500
+				)
+			) 
+			AND province = '陕西省', 
+			1, 
+			0
+		)
+	) as '300-500 陕西省', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 500 
+					AND companySize < 1000
+				) 
+				OR (
+					socialSecurityNumber >= 500 
+					AND socialSecurityNumber < 1000
+				)
+			) 
+			AND province = '陕西省', 
+			1, 
+			0
+		)
+	) as '500-1000 陕西省', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 1000 
+					AND companySize < 3000
+				) 
+				OR (
+					socialSecurityNumber >= 1000 
+					AND socialSecurityNumber < 3000
+				)
+			) 
+			AND province = '陕西省', 
+			1, 
+			0
+		)
+	) as '1000-3000 陕西省', 
+	SUM(
+		IF(
+			(
+				companySize >= 3000 
+				OR socialSecurityNumber >= 3000
+			) 
+			AND province = '陕西省', 
+			1, 
+			0
+		)
+	) as ' 3000 plus  陕西省', 
+	-- split 陕西省
+	SUM(
+		IF(
+			companySize < 100 
+			AND socialSecurityNumber < 100 
+			AND city = '济南市', 
+			1, 
+			0
+		)
+	) as 'less than 100 济南市', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 100 
+					AND companySize < 300
+				) 
+				OR (
+					socialSecurityNumber >= 100 
+					AND socialSecurityNumber < 300
+				)
+			) 
+			AND city = '济南市', 
+			1, 
+			0
+		)
+	) as '100-300 济南市', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 300 
+					AND companySize < 500
+				) 
+				OR (
+					socialSecurityNumber >= 300 
+					AND socialSecurityNumber < 500
+				)
+			) 
+			AND city = '济南市', 
+			1, 
+			0
+		)
+	) as '300-500 济南市', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 500 
+					AND companySize < 1000
+				) 
+				OR (
+					socialSecurityNumber >= 500 
+					AND socialSecurityNumber < 1000
+				)
+			) 
+			AND city = '济南市', 
+			1, 
+			0
+		)
+	) as '500-1000 济南市', 
+	SUM(
+		IF(
+			(
+				(
+					companySize >= 1000 
+					AND companySize < 3000
+				) 
+				OR (
+					socialSecurityNumber >= 1000 
+					AND socialSecurityNumber < 3000
+				)
+			) 
+			AND city = '济南市', 
+			1, 
+			0
+		)
+	) as '1000-3000 济南市', 
+	SUM(
+		IF(
+			(
+				companySize >= 3000 
+				OR socialSecurityNumber >= 3000
+			) 
+			AND city = '济南市', 
+			1, 
+			0
+		)
+	) as ' 3000 plus  济南市'  
+FROM 
+	company__third_party_clues_base_info 
+WHERE 
+	id >= 1 
+	AND id <= 3000000 ;
+
 
 ~~~ 
 
@@ -2183,3 +2368,59 @@ for line in $(cat source.log)
     find  ./ -name "*.php" -mtime 1  昨天修改过的
 
 ~~~
+
+## restructArrayIndex rebuild index
+
+~~~
+
+static function restructArrayIndex($array,$column1){
+        if(empty($array)){
+            return [];
+        }
+
+        $returnArr = [];
+        foreach ($array as $key=>$value){
+            $returnArr[$value[$column1]] =  $value;
+        }
+        return $returnArr;
+}
+
+static function restructArrayIndexV2($array,$column1,$column2){
+        if(empty($array)){
+            return [];
+        }
+
+        $returnArr = [];
+        foreach ($array as $key=>$value){
+            if(
+                $value[$column1]&&
+                $value[$column2]
+            ){
+                $returnArr[$value[$column1]][$value[$column2]] =  $value;
+            }
+        }
+
+        return $returnArr;
+    }
+
+    static function restructArrayIndexV3($array,$column1,$column2,$column3){
+        if(empty($array)){
+            return [];
+        }
+
+        $returnArr = [];
+        foreach ($array as $key=>$value){
+            if(
+                $value[$column1]&&
+                $value[$column2]&&
+                $value[$column3]
+            ){
+                $returnArr[$value[$column1]][$value[$column2]][[$value[$column3]]] =  $value;
+            }
+        }
+
+        return $returnArr;
+    }
+
+~~~
+ 

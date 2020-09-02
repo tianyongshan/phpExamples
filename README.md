@@ -532,3 +532,30 @@ mysql> show profile for query 2;
 
 
 ~~~
+
+
+## qucik count 
+~~~ 
+
+SLOW:
+
+EXPLAIN SELECT COUNT(*) FROM company WHERE id > 5 ;
+
+QUICK :
+EXPLAIN  SELECT (SELECT COUNT(*) FROM company) - COUNT(*) FROM company WHERE id <= 1 ;
+
+~~~ 
+
+## ROLLUP
+~~~ 
+
+SELECT agreement_id, SUM(money) FROM agreements__paylog GROUP by agreement_id WITH ROLLUP ;
+
+~~~ 
+
+
+## SUM IF  
+~~~ 
+SELECT SUM(IF(deal_status=1,1,0)),SUM(IF(deal_status=2,1,0)),SUM(IF(deal_status=3,1,0)) FROM company ;
+
+~~~ 

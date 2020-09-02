@@ -85,3 +85,28 @@
     }
 ~~~
 
+## 本地常驻
+~~~
+function get()
+{
+
+
+	$js = file_get_contents("http://admin2018.aibangmang.org/?_c=crontab&_a=pullAllCompanysListsNewVersion&limit=1000&province=%E6%B5%99%E6%B1%9F%E7%9C%81&debug=0&");
+
+	return $js;
+}
+ 
+ini_set('memory_limit','500M');    // 临时设置最大内存占用为3G
+set_time_limit(0);   // 设置脚本最大执行时间 为0 永不过期
+
+while (1) {
+	$t1 = microtime(true);
+	$n = get();
+	sleep(1);
+	if (!$n) {
+		// sleep(1);
+	} 
+	echo $n, ' spend ', microtime(true) - $t1, "\n";
+
+}
+~~~

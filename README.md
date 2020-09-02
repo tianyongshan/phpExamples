@@ -743,3 +743,43 @@ mysql> SELECT b.processlist_id, c.db, a.sql_text, c.command, c.time, c.state FRO
 
 
 ~~~
+
+## mysql  table size 
+~~~
+
+SELECT
+TABLE_NAME,
+table_rows,
+data_length,
+index_length,
+round(
+(
+(data_length + index_length) / 1024 / 1024
+),
+2
+) "Size in MB"
+FROM
+information_schema.TABLES
+WHERE
+table_schema = "aibangmang"
+ORDER BY
+(data_length + index_length) DESC
+
+~~~
+
+## binlog
+
+~~~ 
+
+show VARIABLES LIKE '%binlog%' ;
+
+binlog_rows_query_log_events : 设置为 ON 可以看到执行的sql
+
+SHOW MASTER LOGS ;
+
+show binlog events in 'mysql-bin.000236' ; 
+show binlog events in 'mysql-bin.000001'  limit 1000 ;
+
+info 里是实际执行的sql
+
+~~~ 

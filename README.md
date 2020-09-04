@@ -1202,6 +1202,9 @@ new03 172.17.22.202 [var]$du -sh
 
 find ./ -type f -size +1G
 
+查找文件夹
+find /WORK -name "storage"
+
 ~~~
 
 
@@ -2598,6 +2601,4 @@ l stands for "show the file name, not the result itself".
   -o will only output the matches, ignoring lines;
   wc can count them:         
 ~~~
-
-
-
+ 

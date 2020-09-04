@@ -1119,9 +1119,11 @@ sz -y tmp_0828.log.gz
 
 cat tmp_sql.log  |grep "SELECT" | awk '{print $3}' |sort -rn |head -5 
 
-
+Top 10 IP Addresses
+awk '{ print $1}' access.log.2016-05-08 | sort | uniq -c | sort -nr | head -n 10
+cat access.log | awk '{print $1}' | sort -n | uniq -c | sort -nr | head -10
 ~~~
-
+ 
 
 ## nslook  IP address
 ~~~
@@ -2599,10 +2601,3 @@ l stands for "show the file name, not the result itself".
 
 
 
-## awk
-~~~
-Top 10 IP Addresses
-awk '{ print $1}' access.log.2016-05-08 | sort | uniq -c | sort -nr | head -n 10
-cat access.log | awk '{print $1}' | sort -n | uniq -c | sort -nr | head -10
-
-~~~

@@ -2553,3 +2553,57 @@ static function copyToWorkDetailPlan($agId){
        return true;     
 }  
 ~~~
+
+
+## grep 
+~~~
+grep directory 目录下匹配关键字
+grep -R 'export'  CodeForCommit/
+grep -rnw 'CodeForCommit/' -e 'export'
+ i stands for ignore case (optional in your case).
+-r or -R is recursive 递归,
+-n is line number,  
+-w stands for match the whole word. 
+l stands for "show the file name, not the result itself".
+
+
+ 包含/不包含关键字的文件
+ grep -riL "checkLicense" .
+  -L, --files-without-match 不包含匹配的文件
+             each file processed.
+  -l, --files-with-matches  包含匹配的文件
+             Only the names of files containing selected lines are written
+
+ 匹配结果前后 匹配新关键词
+  grep -R -C 10  "export" a/ | grep 'checkLicense'  
+
+ 匹配关键1 不匹配关键字2
+ cat a.txt | grep -R   "export" | grep -v 'checkLicense'
+-v, --invert-match
+          Invert the sense of matching, to select non-matching lines.  (-v
+          is specified by POSIX.)
+
+  grep -o 'needle' file | wc -l
+  -o will only output the matches, ignoring lines;
+  wc can count them:         
+~~~
+
+## find 
+~~~
+ file 
+ find / -type f -name "*.conf"
+
+find / -name "*.mp4" -print
+
+ find / -size +10M
+ find / -size +10MB 
+
+~~~
+
+## awk
+~~~
+Top 10 IP Addresses
+awk '{ print $1}' access.log.2016-05-08 | sort | uniq -c | sort -nr | head -n 10
+cat access.log | awk '{print $1}' | sort -n | uniq -c | sort -nr | head -10
+
+~~~

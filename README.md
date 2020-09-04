@@ -2366,7 +2366,16 @@ for line in $(cat source.log)
     find  ./ -name "*.json"
     find  ./ -name "*.php" -mtime 0  今天修改过的
     find  ./ -name "*.php" -mtime 1  昨天修改过的
+    
+    file 
+    find / -type f -name "*.conf" 
+    find / -name "*.mp4" -print
+    find ./ -type f -exec grep -l "export" {} \;
+    find ./ -type f | xargs grep 'export'
 
+    find / -size +10M
+    find / -size +10MB 
+    find ./ -type f -size +1G
 ~~~
 
 ## restructArrayIndex rebuild index
@@ -2588,17 +2597,7 @@ l stands for "show the file name, not the result itself".
   wc can count them:         
 ~~~
 
-## find 
-~~~
- file 
- find / -type f -name "*.conf"
 
-find / -name "*.mp4" -print
-
- find / -size +10M
- find / -size +10MB 
-
-~~~
 
 ## awk
 ~~~

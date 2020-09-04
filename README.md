@@ -1052,6 +1052,23 @@ CREATE OR  REPLACE  VIEW;
 
 ~~~
 
+## WITh 
+~~~
+WITH  tab_1 AS (
+	SELECT 
+		company_id, 
+		min(sign_date) 
+	FROM 
+		agreements__order 
+	GROUP by 
+		company_id
+)
+
+SELECT  * FROM tab_1
+
+
+~~~
+
 
 ## quick delete 
 ~~~
@@ -2616,4 +2633,13 @@ du -sh  20200904
 du -shc  ./202009* 
 
 du -h ./ | sort -rh | head -5
- ~~~
+~~~
+
+## SUM case 
+~~~
+SELECT  
+    SUM(case when kind = 1 then 1 else 0 end) as countKindOne
+
+~~~
+
+

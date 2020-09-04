@@ -2424,18 +2424,8 @@ static function restructArrayIndexV2($array,$column1,$column2){
 
 ~~~
  
-## controller logic example
-~~~
- controller 
- public function transferMainAgToOrder($request, $response)
-    {
-
-         $res =  \model\agreement\Order::transferMainAgToOrder($request->ag_id,$request->force);
-         echo  $res ?'成功':'失败';
-
-    }
-
- logic Or Service     
+## codec example
+~~~  
 static function transferMainAgToOrder($agId,$force=1){
 
     if(!$force){
@@ -2561,7 +2551,5 @@ static function copyToWorkDetailPlan($agId){
         } 
  
        return true;     
-} 
-
-
+}  
 ~~~

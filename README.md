@@ -1049,7 +1049,8 @@ order_id,id FROM agreements__paylog GROUP by order_id;
 
 CREATE OR  REPLACE  VIEW;
 
-
+ SHOW CREATE VIEW `Customers`; 
+ 
 ~~~
 
 ## WITh 

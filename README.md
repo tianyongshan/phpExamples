@@ -1201,6 +1201,7 @@ new03 172.17.22.202 [var]$df -a
 new03 172.17.22.202 [var]$du -sh 
 
 find ./ -type f -size +1G
+find Downloads/ -type f -size +4G
 
 查找文件夹
 find /WORK -name "storage"
@@ -2602,3 +2603,17 @@ l stands for "show the file name, not the result itself".
   wc can count them:         
 ~~~
  
+
+ ## du df 
+ ~~~
+服务器磁盘
+df -h 
+
+文件夹大小
+du -sh  20200904
+
+多个文件夹大小
+du -shc  ./202009* 
+
+du -h ./ | sort -rh | head -5
+ ~~~

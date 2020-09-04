@@ -2424,3 +2424,144 @@ static function restructArrayIndexV2($array,$column1,$column2){
 
 ~~~
  
+## controller logic example
+~~~
+ controller 
+ public function transferMainAgToOrder($request, $response)
+    {
+
+         $res =  \model\agreement\Order::transferMainAgToOrder($request->ag_id,$request->force);
+         echo  $res ?'成功':'失败';
+
+    }
+
+ logic Or Service     
+static function transferMainAgToOrder($agId,$force=1){
+
+    if(!$force){
+        if(!\model\Agreements::checkIfIsMainAg($agId)){
+            return  \yoka\YsError::error('不是主合同 不允许转为订单'.$agId); ;
+        }
+    }
+        
+    $agModel = \model\Agreements::getById($agId);
+
+    
+    if(!$force){
+        if(self::checkIfMainAgIsOrder($agModel->fxiaoke_id)){
+            return  \yoka\YsError::error('已经是订单  不允许转为订单'.$agId); ;
+        }    
+    }
+    
+    if($force){
+        if(self::checkIfMainAgIsOrder($agModel->fxiaoke_id)){
+                
+        }    
+        else{
+            if(!self::replaceAgDataToOrder(" WHERE id = ".$agId)){
+                return  \yoka\YsError::error(' 转订单失败'); 
+            } 
+        }
+    }
+    else{
+        if(!self::replaceAgDataToOrder(" WHERE id = ".$agId)){
+            return  \yoka\YsError::error(' 转订单失败'); 
+        }
+    }
+    
+    
+
+    $orderModel = self::getByFxiaokeId($agModel->fxiaoke_id); 
+
+    if(!\model\Agreements::setAgsOrderId($agId,$orderModel->id)){
+        return  \yoka\YsError::error(' 设定合同的订单id失败'); 
+    }
+
+    if(!\model\AgreementsPaylog::setOrderIdByAgId($agId,$orderModel->id)){
+        return  \yoka\YsError::error(' 设定回款的订单id失败'); 
+    }
+        
+    if(!\model\agreement\WorkDetail::setOrderIdByAgId($agId,$orderModel->id)){
+        return  \yoka\YsError::error(' 设定销售自建工单的订单id失败'); 
+    };
+
+    if(!\model\agreement\WorkDetailPayLog::setOrderIdByAgId($agId,$orderModel->id)){
+        return  \yoka\YsError::error(' 设定销售自建回款的订单id失败'); 
+    } 
+
+    if(!\model\sales\SalesInvoice::setOrderIdByAgId($agId,$orderModel->id)){
+        return  \yoka\YsError::error(' 设定发票的订单id失败'); 
+    };
+
+    if(!self::copyAgToXiaoShouBao($orderModel,$agId)){
+    return  \yoka\YsError::error(' 复制工单失败'); 
+    }
+        
+    // \model\agreement\WorkDetailPlan::$table;
+    if(!\model\AgreementsPlan::copyToWorkDetailPlan($agId)){
+        return  \yoka\YsError::error(' 复制方案失败'); 
+    }; 
+
+    if(!\model\AgreementsPaylog::copyToWorkDetailPaylog($orderModel->id)){
+
+    };
+
+    return  true ;
+} 
+
+static function copyToWorkDetailPlan($agId){
+
+        $agModel =  \model\Agreements::getById($agId);
+        
+        $orderModel =  \model\agreement\Order::getById($agModel->order_id);
+
+        $workDetailModel = \model\agreement\WorkDetail::getByOrderIdAndAgNoAndCompanyId(
+            $orderModel->id,
+            $orderModel->agreement_no,
+            $orderModel->company_id_accredit,
+            $orderModel->company_id
+        );
+
+        $allPlans = self::getByAgreementId($agId);
+        foreach($allPlans as $planItem){
+            $detailData = [
+                'company_id'=>$planItem['company_id'],
+                'work_detail_id'=>$workDetailModel->id,
+                'year'=>date('Y',strtotime($planItem['begin_date'])),
+                'begin'=>intval(date('m',strtotime($planItem['begin_date']))),
+                'end'=>intval(date('m',strtotime($planItem['end_date']))),
+                'need_p'=>$planItem['need_num'],
+                'need_pm'=>$planItem['need_pm'],
+                'days_submit_zl'=>5,
+                'days_contract_upload'=>5,
+                'days_contract_sign'=>15,
+                'days_complete'=>5,
+            ];  
+           
+            if(
+                \model\agreement\WorkDetailPlan::getByWorkDetailIdAndDate(
+                    $detailData['work_detail_id'],
+                    $detailData['year'],
+                    $detailData['begin'],
+                    $detailData['end']
+                )
+            ){
+
+            }
+
+            else{
+                $newPlanModel =  new \model\agreement\WorkDetailPlan();
+                if(
+                    !$newPlanModel->add($detailData)
+                ){
+                   return  \yoka\YsError::error('插入失败'.json_encode($detailData));
+                } 
+            }
+
+        } 
+ 
+       return true;     
+} 
+
+
+~~~

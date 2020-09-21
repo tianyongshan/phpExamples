@@ -2643,4 +2643,39 @@ SELECT
 
 ~~~
 
+## mysql table version  
+~~~
+ CREATE TABLE IF NOT EXISTS `table1` (
+  `id` int(11) NOT NULL,
+   product VARCHAR(100) NOT NULL,
+    quantity INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS `table1_versions` (
+  `id` int(11) NOT NULL,
+   product VARCHAR(100) NOT NULL,
+    quantity INT NOT NULL DEFAULT 0,
+  `idhistory` int(20) NOT NULL auto_increment ,
+  `historydate` datetime default NULL ,
+  PRIMARY KEY (`idhistory`)
+) ;
+  
+DELIMITER $$ 
+CREATE TRIGGER table1_trigger BEFORE UPDATE ON table1 
+FOR EACH ROW BEGIN
+   INSERT INTO table1_versions 
+          SELECT *,null,NOW() FROM table1 WHERE id = OLD.id ; 
+END$$ 
+DELIMITER ; 
+
+INSERT INTO table1(id,product, quantity)
+VALUES
+    (1,'2001 Ferrari Enzo',140),
+    (2,'1998 Chrysler Plymouth Prowler', 110),
+    (3,'1913 Ford Model T Speedster', 120);
+
+update  table1 set product = 240  ;
+
+
+~~~
 

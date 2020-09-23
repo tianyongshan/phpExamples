@@ -116,6 +116,18 @@
  SHOW FULL PROCESSLIST  ;
  Select concat('KILL ',id,';') from information_schema.processlist where user='root';
 
+select 
+	GROUP_CONCAT(stat SEPARATOR ' ') 
+from 
+	(
+		select 
+			concat('KILL ', id, ';') as stat 
+		from 
+			information_schema.processlist
+        WHERE USER = 'root'
+	) as stats ;
+
+
 ~~~
 
 ## 本地常驻

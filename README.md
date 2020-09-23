@@ -112,6 +112,10 @@
     }
     
 
+    
+ SHOW FULL PROCESSLIST  ;
+ Select concat('KILL ',id,';') from information_schema.processlist where user='root';
+
 ~~~
 
 ## 本地常驻
@@ -1222,7 +1226,7 @@ find ./ -type f -size +1G
 find Downloads/ -type f -size +4G
 
 查找文件夹
-find /WORK -name "storage"
+find /WORK -name "udf"
 
 ~~~
 
@@ -2393,6 +2397,7 @@ for line in $(cat source.log)
     
     file 
     find / -type f -name "*.conf" 
+    find / -name 'httpd.conf' -print
     find / -name "*.mp4" -print
     find ./ -type f -exec grep -l "export" {} \;
     find ./ -type f | xargs grep 'export'
@@ -2674,8 +2679,24 @@ VALUES
     (2,'1998 Chrysler Plymouth Prowler', 110),
     (3,'1913 Ford Model T Speedster', 120);
 
-update  table1 set product = 240  ;
-
+mysql> select * from  table1_versions  ;
++----+-------------------+----------+-----------+---------------------+
+| id | product           | quantity | idhistory | historydate         |
++----+-------------------+----------+-----------+---------------------+
+|  1 | 2001 Ferrari Enzo |      140 |         1 | 2020-09-21 13:55:23 |
+|  1 | 2001 Ferrari Enzo |      240 |         2 | 2020-09-21 13:56:26 |
++----+-------------------+----------+-----------+---------------------+
+mysql> select * from  table1_versions  ;
++----+--------------------------------+----------+-----------+---------------------+
+| id | product                        | quantity | idhistory | historydate         |
++----+--------------------------------+----------+-----------+---------------------+
+|  1 | 2001 Ferrari Enzo              |      140 |         1 | 2020-09-21 13:55:23 |
+|  1 | 2001 Ferrari Enzo              |      240 |         2 | 2020-09-21 13:56:26 |
+|  1 | 240                            |      240 |         3 | 2020-09-21 13:56:44 |
+|  2 | 1998 Chrysler Plymouth Prowler |      110 |         4 | 2020-09-21 13:56:44 |
+|  3 | 1913 Ford Model T Speedster    |      120 |         5 | 2020-09-21 13:56:44 |
++----+--------------------------------+----------+-----------+---------------------+
+5 rows in set (0.00 sec)
 
 ~~~
 

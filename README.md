@@ -127,7 +127,7 @@ from
         WHERE USER = 'root'
 	) as stats ;
 
-
+mysqladmin -u root -p  -i 1 processlist
 ~~~
 
 ## 本地常驻
@@ -1239,6 +1239,8 @@ find Downloads/ -type f -size +4G
 
 查找文件夹
 find /WORK -name "udf"
+
+
 
 ~~~
 
@@ -2417,6 +2419,10 @@ for line in $(cat source.log)
     find / -size +10M
     find / -size +10MB 
     find ./ -type f -size +1G
+    
+    不包含的
+    find ./ -iname "*.php" -exec grep -Li "parent::__construct" {} \+
+
 ~~~
 
 ## restructArrayIndex rebuild index

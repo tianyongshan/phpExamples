@@ -127,7 +127,67 @@ from
         WHERE USER = 'root'
 	) as stats ;
 
-mysqladmin -u root -p  -i 1 processlist
+
+每秒执行查看进程数
+mysqladmin -u root -p  -i 1 processlist 
+
+监控进程数 过多时自动杀死
+sudo vi mysql_monitor.php ;
+<?php
+$mysqli = new mysqli("localhost","root","root","mytest");
+
+// Check connection
+if ($mysqli -> connect_errno) {
+  echo "Failed to connect to MySQL: " . $mysqli -> connect_error;
+  exit();
+}
+  
+$sql = "SELECT 
+	* 
+	FROM 
+	information_schema.processlist 
+	WHERE 
+	USER = 'root' 
+";
+
+if ($result = $mysqli->query($sql)) {
+	// 40个以内的连接数不予处理
+	if($result -> num_rows<=40){
+		// echo "40个以内的连接数不予处理: " . $result -> num_rows;
+		exit();
+	} 
+
+	// 干掉十秒以上的
+	$sql = "SELECT 
+			* 
+			FROM 
+			information_schema.processlist 
+			WHERE 
+			USER = 'root' 
+			AND TIME>=10
+	 ";
+	
+	$result = $mysqli->query($sql);  
+	$ids = []; 
+	while ( $rows = $result->fetch_assoc() ) {
+		print_r(array_merge($rows,[
+			'DATE'=>date('Y-m-d H:i:s')
+		])); 
+		$ids[$rows['ID']] = $rows['ID'];
+	} 
+
+	foreach($ids as $id){
+		$sql = " KILL  ".$id; 
+		$result = $mysqli->query($id); 
+	}  
+} 
+$mysqli -> close();
+
+sudo vi kill.txt ;
+sudo chmod 777 kill.txt ;
+
+watch -n 1 "/usr/bin/php mysql_monitor.php >> kill.txt"
+
 ~~~
 
 ## 本地常驻

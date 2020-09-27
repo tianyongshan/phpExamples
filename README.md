@@ -2725,6 +2725,7 @@ SELECT
     SUM(case when kind = 1 then 1 else 0 end) as countKindOne
 
 ~~~
+ 
 
 ## mysql table version  
 ~~~
@@ -2776,5 +2777,17 @@ mysql> select * from  table1_versions  ;
 +----+--------------------------------+----------+-----------+---------------------+
 5 rows in set (0.00 sec)
 
+~~~
+
+
+
+
+
+## mysql source  
+~~~
+  ubuntu@VM-0-4-ubuntu:/home/$ sudo mkdir dbData;
+  ubuntu@VM-0-4-ubuntu:/home/$  cd dbData/;
+  ubuntu@VM-0-4-ubuntu:/home/dbData$ sudo  rz -y ;
+  mysql> source /home/dbData/sales.sql; 
 ~~~
 

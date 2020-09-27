@@ -2791,3 +2791,38 @@ mysql> select * from  table1_versions  ;
   mysql> source /home/dbData/sales.sql; 
 ~~~
 
+## mysql update   
+~~~
+   SELECT id,fxiaoke_id,name,mobile,remark,salary FROM `sales` WHERE name in('李庆','张强');
+   根据主键、唯一键 更新 reamrk 字段 
+   INSERT INTO sales 
+            ( 
+                        remark, 
+                        salary, 
+                        name,
+                        id 
+            ) 
+            VALUES 
+            ( 
+                        '1', 
+                        100, 
+                        '李庆',
+                        '586' 
+            ) 
+            , 
+            ( 
+                        '2', 
+                        200, 
+                        '张强',
+                        '615' 
+            ) 
+on duplicate KEY UPDATE id=VALUES 
+       ( 
+              id 
+       ) ;
+    注意：非空且没有默认值的字段 都需要写上   
+
+~~~
+
+
+

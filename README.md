@@ -2821,8 +2821,74 @@ on duplicate KEY UPDATE id=VALUES
               id 
        ) ;
     注意：非空且没有默认值的字段 都需要写上   
+     
+~~~
+
+
+## mysql update case where    
+~~~
+    UPDATE users
+    SET value = CASE 
+        WHEN id in (1,4) THEN 53
+        WHEN id = 2 THEN 65
+        WHEN id in (3,5) THEN 47
+    END
+    WHERE id IN (1,2,3,4,5) ;
+~~~
+
+
+## mysql update case where    
+~~~
+  SELECT   TABLE_NAME AS `Table`,   ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024) AS `Size (MB)` FROM   
+  information_schema.TABLES where TABLE_NAME = 'wp_usermeta_new' ;   
 
 ~~~
+
+
+## mysql ARCHIVE  engine 
+~~~
+mysam engine :
+mysql> SELECT   TABLE_NAME AS `Table`,   ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024) AS `Size (MB)` FROM  
+    ->  information_schema.TABLES where TABLE_NAME = 'wp_usermeta_new' ;
++-----------------+-----------+
+| Table           | Size (MB) |
++-----------------+-----------+
+| wp_usermeta_new |       432 |
++-----------------+-----------+
+
+ARCHIVE  engine 
+ALTER TABLE wp_usermeta_new DROP  KEY user_id ;
+ALTER TABLE wp_usermeta_new AUTO_INCREMENT=0, ENGINE=ARCHIVE;
+mysql> SELECT   TABLE_NAME AS `Table`,   ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024) AS `Size (MB)` FROM    information_schema.TABLES where TABLE_NAME = 'wp_usermeta_new';
++-----------------+-----------+
+| Table           | Size (MB) |
++-----------------+-----------+
+| wp_usermeta_new |        49 |
++-----------------+-----------+
+1 row in set (0.01 sec)
+
+
+  CREATE TABLE `wp_usermeta_new` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `meta_key` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `meta_value` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=ARCHIVE AUTO_INCREMENT=13219999 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ;
+mysql> desc wp_usermeta_new ;
++------------+-------------+------+-----+---------+----------------+
+| Field      | Type        | Null | Key | Default | Extra          |
++------------+-------------+------+-----+---------+----------------+
+| id         | int(11)     | NO   | PRI | NULL    | auto_increment |
+| user_id    | int(11)     | YES  |     | NULL    |                |
+| meta_key   | varchar(10) | YES  |     | NULL    |                |
+| meta_value | varchar(10) | YES  |     | NULL    |                |
++------------+-------------+------+-----+---------+----------------+
+4 rows in set (0.02 sec)
+
+
+~~~
+
 
 
 

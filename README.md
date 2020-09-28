@@ -2903,7 +2903,7 @@ ubuntu@VM-0-4-ubuntu:/var/www/shell$ cat db_login.sh
 
 #!/bin/sh
 source /var/www/conf/db.conf
-# mysql -uroot -pmyroot2070 
+# mysql -uroot -proot 
 #echo "$username"
 mysql  -u"$username" -p"$password"
 

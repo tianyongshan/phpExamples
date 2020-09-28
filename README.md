@@ -2936,3 +2936,11 @@ source ~/.bashrc
 
 ~~~
 
+
+
+##   watch  every 5 seconds    
+~~~
+  watch -n 6   " curl    --request GET  'http://XXXX.org/?_c=crontab&_a=pullAllCompanysListsNewVersion&limit=1000'"
+~~~
+
+

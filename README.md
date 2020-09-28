@@ -2465,7 +2465,9 @@ for line in $(cat source.log)
 
 ## find 
 ~~~
+
     find  ./ -name "*.json"
+    find  ./ -name "mysqld.sock"
     find  ./ -name "*.php" -mtime 0  今天修改过的
     find  ./ -name "*.php" -mtime 1  昨天修改过的
     
@@ -2847,6 +2849,7 @@ on duplicate KEY UPDATE id=VALUES
 
 ## mysql ARCHIVE  engine 
 ~~~
+
 mysam engine :
 mysql> SELECT   TABLE_NAME AS `Table`,   ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024) AS `Size (MB)` FROM  
     ->  information_schema.TABLES where TABLE_NAME = 'wp_usermeta_new' ;
@@ -2890,5 +2893,46 @@ mysql> desc wp_usermeta_new ;
 ~~~
 
 
+## mysql login sh     
+~~~
+ubuntu@VM-0-4-ubuntu:/var/www/conf$ cat db.conf 
+username="root"
+password="root"
 
+ubuntu@VM-0-4-ubuntu:/var/www/shell$ cat db_login.sh 
+
+#!/bin/sh
+source /var/www/conf/db.conf
+# mysql -uroot -pmyroot2070 
+#echo "$username"
+mysql  -u"$username" -p"$password"
+
+
+ubuntu@VM-0-4-ubuntu:/var/www/shell$ bash  db_login.sh
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 515
+Server version: 5.7.31-0ubuntu0.16.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+
+
+全局
+ubuntu@VM-0-4-ubuntu:/var/www/shell$ cat  /home/ubuntu/.bashrc 
+PATH=$PATH:/var/www/shell
+
+source ~/.bashrc
+
+
+
+
+~~~
 

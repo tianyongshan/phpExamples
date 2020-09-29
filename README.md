@@ -3118,7 +3118,7 @@ cat  access.log | awk '$26 > 0.01 && 0.03 > $6' | wc -l
 
  ## goaccess  nginx log 
 ~~~
- sudo apt install goaccess
+ sudo apt install goaccess 
 
  sudo vi  /etc/nginx/nginx.conf
 log_format main '$remote_addr - $remote_user [$time_local] '
@@ -3163,3 +3163,35 @@ Dashboard - Overall Analyzed Requests                                           
 
 
 ~~~
+
+
+## nginx access log 
+~~~
+logrotate nginx log by numbers
+sudo systemctl reload nginx :  
+ /var/log/nginx/*.log {
+                daily
+                missingok
+                rotate 14
+                compress
+                delaycompress
+                notifempty
+                create 0640 www-data adm
+                dateext
+                dateformat -%Y-%m-%d.log
+                sharedscripts
+                prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi \
+                endscript
+                postrotate
+                invoke-rc.d nginx rotate >/dev/null 2>&1
+                endscript
+                }
+
+sudo nginx -t
+sudo systemctl reload nginx 
+
+~~~
+

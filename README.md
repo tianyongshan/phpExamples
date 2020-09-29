@@ -3092,6 +3092,10 @@ awk '($26 ~ /0.012/)' access.log
 所有非200
 awk '($10 !~ /200/)' access.log  
 
+时长大于0.01秒的
+cat  access.log | awk '$26 > 0.011' 
+cat  access.log | awk '$26 > 0.01 && 0.03 > $6' | wc -l
+
 ~~~
 
 

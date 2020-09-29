@@ -3138,7 +3138,12 @@ Dashboard - Overall Analyzed Requests                                           
  3       0 100.00%   546.0   B  43.67 ms 131.00 ms  45.00 ms --- ---      \x05\x01\x00
 
 
+  
 
+ 生成网页：
+ goaccess -f /var/log/nginx/access.log --log-format=COMBINED -a > /var/www/html/vpser.html
+ 浏览器访问
+ http://你的域名/vpser.html#visit_time 
 
 
 ~~~

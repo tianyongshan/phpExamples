@@ -2826,6 +2826,22 @@ on duplicate KEY UPDATE id=VALUES
      
 ~~~
 
+## tar 
+~~~
+压缩
+tar -cvf app.tar app/
+tar –cvf app.tar *.jpg
+
+
+解压
+tar -xvf app.tar
+
+
+下载
+sz -bey app.tar
+
+
+~~~
 
 ## mysql update case where    
 ~~~

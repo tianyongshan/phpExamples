@@ -3066,10 +3066,31 @@ ubuntu@VM-0-4-ubuntu:/etc/nginx$ awk '($9 ~ /404/)' /var/log/nginx/access.log | 
 
 who are request
 awk -F\" '($2 ~ "/test.php"){print $1}' /var/log/nginx/access.log | awk '{print $1}' | sort | uniq -c | sort -r
+ 
 
-  
+  awk '{print $4,$10,$13,$26,$27}' access.log
+[29/Sep/2020:09:34:07 200 "http://49.232.126.145/wordpress/wp-admin/post.php?post=61&action=edit" 0.356 0.336
+[29/Sep/2020:09:34:09 200 "http://49.232.126.145/wordpress/wp-admin/post.php?post=61&action=edit" 0.013 0.013
+[29/Sep/2020:09:34:10 200 "http://49.232.126.145/wordpress/wp-admin/post.php?post=61&action=edit" 0.015 0.015
+[29/Sep/2020:09:34:11 200 "http://49.232.126.145/wordpress/wp-admin/post.php?post=61&action=edit" 0.028 0.028
+[29/Sep/2020:09:34:11 200 "http://49.232.126.145/wordpress/wp-admin/post.php?post=61&action=edit" 0.027 0.027
+[29/Sep/2020:09:34:11 200 "http://49.232.126.145/wordpress/wp-admin/post.php?post=61&action=edit" 0.012 0.012
 
+所有200请求
+awk '($10 ~ /200/)' access.log  
+awk '($10 ~ /200/)' access.log | awk '{print $26}' | sort |head -5 
+0.012
+0.013
+0.013
+0.015
+0.015
+0.017
+0.020
+0.023
+awk '($26 ~ /0.012/)' access.log 
 
+所有非200
+awk '($10 !~ /200/)' access.log  
 
 ~~~
 

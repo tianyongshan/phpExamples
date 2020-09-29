@@ -3098,6 +3098,47 @@ cat  access.log | awk '$26 > 0.01 && 0.03 > $6' | wc -l
 
 ~~~
 
+ 
+
+ ## goaccess  nginx log 
+~~~
+ sudo apt install goaccess
+
+ sudo vi  /etc/nginx/nginx.conf
+log_format main '$remote_addr - $remote_user [$time_local] '
+                '"$request" $status $body_bytes_sent '
+                '"$http_referer" "$http_user_agent" '
+                '$upstream_response_time $request_time';
+
+
+sudo vi /etc/goaccess.conf
+time-format %T
+date-format %d/%b/%Y
+log-format %h - %^ [%d:%t %^] "%r" %s %b "%R" "%u"  %^ %T
+
+ubuntu@VM-0-4-ubuntu:/var/log/nginx$ goaccess -f access.log
+
+Dashboard - Overall Analyzed Requests                                                                                                                            [Active Panel: Visitors]
+
+  Total Requests  50 Unique Visitors 0 Unique Files 1 Referrers 0
+  Valid Requests  3  Processed Time  0 Static Files 0 Log Size  11.51 KiB
+  Failed Requests 47 Excl. IP Hits   0 Unique 404   0 Bandwidth 546.0   B
+  Log File        access.log
+
+ > 1 - Unique visitors per day - Including spiders                                                                                                                             Total: 1/1
+
+ Hits Vis.       %   Bandwidth Avg. T.S. Cum. T.S. Max. T.S. Data
+ ---- ---- ------- ----------- --------- --------- --------- ----
+ 3       0 100.00%   546.0   B  43.67 ms 131.00 ms  45.00 ms 29/Sep/2020 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+   2 - Top requests (URLs)                                                                                                                                                     Total: 1/1
+
+ Hits Vis.       %   Bandwidth Avg. T.S. Cum. T.S. Max. T.S. Mtd Proto    Data
+ ---- ---- ------- ----------- --------- --------- --------- --- -------- ----
+ 3       0 100.00%   546.0   B  43.67 ms 131.00 ms  45.00 ms --- ---      \x05\x01\x00
 
 
 
+
+
+~~~

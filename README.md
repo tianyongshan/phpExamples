@@ -2944,3 +2944,135 @@ source ~/.bashrc
 ~~~
 
 
+
+
+##   nginx  log formatt
+~~~
+ubuntu@VM-0-4-ubuntu:/etc/nginx$ cat  nginx.conf 
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+	worker_connections 768;
+# multi_accept on;
+}
+
+http {
+
+##
+# Basic Settings
+##
+
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+# server_tokens off;
+
+# server_names_hash_bucket_size 64;
+# server_name_in_redirect off;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+##
+# SSL Settings
+##
+
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+		ssl_prefer_server_ciphers on;
+
+##
+# Logging Settings
+	log_format main '$remote_addr - $remote_user [$time_local] '
+		'"$request" $status $body_bytes_sent '
+		'"$http_referer" "$http_user_agent" '
+		'$request_time $upstream_response_time $pipe';
+##
+
+	access_log /var/log/nginx/access.log   main;
+	error_log /var/log/nginx/error.log;
+
+##
+# Gzip Settings
+##
+
+	gzip on;
+	gzip_disable "msie6";
+
+# gzip_vary on;
+# gzip_proxied any;
+# gzip_comp_level 6;
+# gzip_buffers 16 8k;
+# gzip_http_version 1.1;
+# gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+##
+# Virtual Host Configs
+##
+
+	include /etc/nginx/conf.d/*.conf;
+				   include /etc/nginx/sites-enabled/*;
+				   }
+
+
+#mail {
+#	# See sample authentication script at:
+#	# http://wiki.nginx.org/ImapAuthenticateWithApachePhpScript
+# 
+#	# auth_http localhost/auth.php;
+#	# pop3_capabilities "TOP" "USER";
+#	# imap_capabilities "IMAP4rev1" "UIDPLUS";
+# 
+#	server {
+#		listen     localhost:110;
+#		protocol   pop3;
+#		proxy      on;
+#	}
+# 
+#	server {
+#		listen     localhost:143;
+#		protocol   imap;
+#		proxy      on;
+#	}
+#}
+ubuntu@VM-0-4-ubuntu:/etc/nginx$ 
+
+
+sudo nginx -t 
+
+sudo systemctl reload nginx 
+
+ubuntu@VM-0-4-ubuntu:/etc/nginx$ tail -f /var/log/nginx/access.log 
+121.69.30.230 - - [28/Sep/2020:16:09:30 +0800] "GET /wordpress/ HTTP/1.1" 200 25349 "-" "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36" 0.315 0.028 .
+ 
+~~~
+
+
+## Nginx access   log 
+~~~
+
+
+http  status  cnt
+awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn
+which 404 502
+awk '($9 ~ /404/)' /var/log/nginx/access.log | awk '{print $7}' | sort | uniq -c | sort -rn
+awk '($9 ~ /502/)' /var/log/nginx/access.log | awk '{print $7}' | sort | uniq -c | sort -r
+ubuntu@VM-0-4-ubuntu:/etc/nginx$ awk '($9 ~ /404/)' /var/log/nginx/access.log | awk '{print $7}' | sort | uniq -c | sort -rn
+     11 /test.php
+     10 /wordpress/wp-admin/admin-ajax.php
+
+who are request
+awk -F\" '($2 ~ "/test.php"){print $1}' /var/log/nginx/access.log | awk '{print $1}' | sort | uniq -c | sort -r
+
+  
+
+
+
+~~~
+
+
+
+

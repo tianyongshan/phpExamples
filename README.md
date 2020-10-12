@@ -974,9 +974,7 @@ SELECT
 	c.state 
 FROM 
 	performance_schema.events_statements_current a 
-	JOIN performance_schema.threads b USING(thread_id) 
-
-
+	JOIN performance_schema.threads b USING(thread_id)  
 	JOIN information_schema.processlist c ON b.processlist_id = c.id ;
 
 
@@ -3195,3 +3193,15 @@ sudo systemctl reload nginx
 
 ~~~
 
+
+## free 
+~~~
+
+ubuntu@VM-0-4-ubuntu:~$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           864M        289M         73M         38M        500M        351M
+Swap:            0B          0B          0B
+
+
+
+~~~

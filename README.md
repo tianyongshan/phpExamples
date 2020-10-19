@@ -3205,3 +3205,21 @@ Swap:            0B          0B          0B
 
 
 ~~~
+
+
+## https page use http   source
+~~~
+
+ 1:https跳转页面：https://mydomin.com/?_c=work&_a=test
+ document.location.href ="http://cdn.aibangmang.org/media/images/logo.png";
+ 2:
+ https展示页
+ <html>
+<iframe src="https://mydomin.com/?_c=work&_a=test"></iframe>
+</html>
+
+
+~~~
+
+
+

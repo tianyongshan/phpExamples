@@ -2483,6 +2483,10 @@ for line in $(cat source.log)
     不包含的
     find ./ -iname "*.php" -exec grep -Li "parent::__construct" {} \+
 
+    找到50M以下的 复制过去
+    find /home/ubuntu/d1 -type f -size -50000k -exec cp -nv {}  /home/ubuntu/d2   \;
+
+
 ~~~
 
 ## restructArrayIndex rebuild index
@@ -3260,4 +3264,4 @@ DELIMITER ;
 
 
  
-
+ 

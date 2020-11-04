@@ -2486,7 +2486,7 @@ for line in $(cat source.log)
     找到50M以下的 复制过去
     find /home/ubuntu/d1 -type f -size -50000k -exec cp -nv {}  /home/ubuntu/d2   \;
 
-
+    yes | find /home/ubuntu/d1 -type f -size -50000k -exec cp -nv {}  /home/ubuntu/d2   \;
 ~~~
 
 ## restructArrayIndex rebuild index
@@ -2830,10 +2830,12 @@ on duplicate KEY UPDATE id=VALUES
 
 ## tar 
 ~~~
-压缩
+压缩 并不减大小
 tar -cvf app.tar app/
 tar –cvf app.tar *.jpg
 
+压缩 减大小
+tar -zcvf app.tar app/
 
 解压
 tar -xvf app.tar

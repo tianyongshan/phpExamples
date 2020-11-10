@@ -1022,7 +1022,10 @@ information_schema.TABLES
 WHERE
 table_schema = "aibangmang"
 ORDER BY
-(data_length + index_length) DESC
+(data_length + index_length) DESC ;
+
+
+SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'aibangmang' and TABLE_TYPE='BASE TABLE';
 
 ~~~
 

@@ -3267,6 +3267,14 @@ DELIMITER ;
 ~~~
 
 
+## mysql safe mode 
+~~~
 
+show VARIABLES LIKE '%sql_mode%';
+select @@global.sql_mode ;
+mysql  strict_mode. But it allowed not null when insert data .  not  return error 
+
+
+~~~
  
  

@@ -3277,4 +3277,25 @@ mysql  strict_mode. But it allowed not null when insert data .  not  return erro
 
 ~~~
  
+
+##    MySQL Scheduled Event
+~~~
+
+SET GLOBAL event_scheduler = ON;
+ 
+ CREATE TABLE messages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    message VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL
+); 
+
+REATE EVENT test_event_02
+ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 MINUTE
+ON COMPLETION PRESERVE
+DO
+   INSERT INTO messages(message,created_at)
+   VALUES('Test MySQL Event 2',NOW());
+
+
+~~~
  

@@ -3299,3 +3299,39 @@ DO
 
 ~~~
  
+
+## mysql  self join  index
+~~~
+ EXPLAIN SELECT 
+	log1.id as begin_id, 
+	log1.company_id as company_id, 
+	log1.old_csm_sales_id as csm_charger, 
+	log1.create_time as begin_time, 
+	log2.id as end_id, 
+	log2.new_csm_sales_id as next_charger, 
+	IF(log2.create_time IS  NULL ,'2099-01-01 00:00:00',log2.create_time ) as end_time  
+FROM 
+	`company__csm_change_log` as log1 
+	LEFT JOIN `company__csm_change_log` as log2 ON log1.new_csm_sales_id = log2.old_csm_sales_id 
+	AND log1.id < log2.id;
+
+ 用不上索引
+
+EXPLAIN SELECT 
+	log1.id as begin_id, 
+	log1.company_id as company_id, 
+	log1.old_csm_sales_id as csm_charger, 
+	log1.create_time as begin_time, 
+	log2.id as end_id, 
+	log2.new_csm_sales_id as next_charger, 
+	IF(log2.create_time IS  NULL ,'2099-01-01 00:00:00',log2.create_time ) as end_time  
+FROM 
+	`company__csm_change_log` as log1 
+	LEFT JOIN `company__csm_change_log` as log2 ON log1.new_csm_sales_id = log2.old_csm_sales_id 
+	AND log1.id < log2.id
+    AND log2.id  > 100 
+    WHERE log1.id  > 100  ;
+
+可以用得上索引 
+    
+~~~

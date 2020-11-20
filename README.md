@@ -3335,3 +3335,36 @@ FROM
 可以用得上索引 
     
 ~~~
+
+## php export xls  light class 
+~~~
+
+public function testXlsWriter3($request, $response)
+    {  
+         
+        $data = [];
+
+        $writer = new \model\XlsWriter();
+        $writer->setAuthor('Some Author'); 
+        for($i=1;$i<=5;$i++){
+            self::echo_memory_usage();
+            $rows = \model\ReflushDataIds::getByIdsV2(($i-1)*200,($i-1)*200+200); 
+            // $rows = \model\ReflushDataIds::yieldData($rows);
+            foreach ($rows as   $record ){ 
+                $data[] = $record; 
+                foreach($data as $row){
+                    $writer->writeSheetRow('Sheet1', $row);
+                }
+            }               
+        } 
+       
+        $writer->writeToStdOut();
+        $writer->SetOut("example.xlsx");
+        //$writer->writeToFile('example.xlsx');
+        //echo $writer->writeToString();  
+        exit(0);
+    }
+
+  
+
+~~~

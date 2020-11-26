@@ -3358,7 +3358,8 @@ public function testXlsWriter3($request, $response)
             }
     
         } 
-            
+
+          
         $writer->writeToStdOut();
         $writer->SetOut("example.xlsx");
         //$writer->writeToFile('example.xlsx');
@@ -3370,3 +3371,127 @@ public function testXlsWriter3($request, $response)
   
 
 ~~~
+
+
+
+## php memory
+~~~
+        case 1:
+        $model = new \model\Company();
+        foreach ($record as $datum){
+            
+
+           $companyData= \model\Company::getEntityById(1);
+           $company2Data= \model\Company::getEntityById(1);
+           $company3Data= \model\Company::getEntityById(1);
+             
+            $datum['xxx']=$companyData['id'];
+            $datum['xxx2']=$company2Data['id'];
+            $datum['xxx3']=$company3Data['id'];  
+
+        }
+
+        每loop一次 涨一次   累加
+
+
+         case 2： select 取的越少   limit 返回的行数越少 占得越少 
+         
+         可尝试：一次复杂sql  取出必须 
+        $model = new \model\Company();
+        foreach ($record as $datum){ 
+
+                        $res = $model->fetchAll("select 
+                            ag_payLog.*   
+                        from 
+                            agreements__paylog as ag_payLog 
+                            LEFT JOIN agreements__order as ag_ ON ag_payLog.order_id = ag_.id 
+                        where 
+                        XXXX
+                        limit 
+                            0, 
+                            5");
+            $datum['xxx']=$companyData['id'];
+            $datum['xxx2']=$company2Data['id'];
+            $datum['xxx3']=$company3Data['id'];  
+
+        } 
+  
+
+~~~
+
+
+## yield
+~~~
+
+static function testYield($record){
+        $model = new \model\company();
+        foreach ($record as $datum){
+            
+
+            $companyData= \model\Company::getEntityById(1);
+            $company2Data= \model\Company::getEntityById(1);
+            $company3Data= \model\Company::getEntityById(1);
+            $datum['xxx']=$companyData['id'];
+            $datum['xxx2']=$company2Data['id'];
+            $datum['xxx3']=$company3Data['id']; 
+            //  unset($company3Data);
+            //  unset($company2Data);
+            //  unset($companyData);
+            yield $datum;
+
+        }
+    }
+
+    public function testXlsWriter2($request, $response)
+    {  
+        $writer = new \model\XlsWriter(); 
+        $writer->setAuthor('Some Author'); 
+
+        for($i=0;$i<=2;$i++){
+            $data = [];
+            self::echo_memory_usage();
+            $rows = \model\ReflushDataIds::getByIdsV2($i*10+1,$i*10+1+10,'id'); 
+             
+            $rows = self::testYield($rows); 
+           // 无论yield 里多少处理   不会产生压力
+            foreach ($rows as   $record ){ 
+                $data[] = $record; 
+            }   
+           
+            // 只要打开 就会有压力
+            foreach($data as $row){
+                $writer->writeSheetRow('Sheet1', $row);
+            }
+    
+        } 
+            
+        var_dump2();
+        $writer->writeToStdOut();
+        $writer->SetOut("example.xlsx");
+        //$writer->writeToFile('example.xlsx');
+        //echo $writer->writeToString(); 
+ 
+        exit(0);
+
+
+    }
+
+~~~
+
+
+##  strace
+~~~
+ ps -ef|grep php  
+
+ubuntu   21352 21317 99 11:43 pts/1    00:00:02 /usr/bin/php7.0 while.php
+ubuntu   21369 19990  0 11:43 pts/3    00:00:00 grep --color=auto php
+root     26325     1  0 Nov20 ?        00:00:16 php-fpm: master process (/etc/php/7.0/fpm/php-fpm.conf)
+sudo strace -f  -p  26325   $( -p  26325   | sed 's/\([0-9]*\)/\-p \1/g') 
+
+
+sudo strace -f $(pidof php-fpm7.0 | sed 's/\([0-9]*\)/\-p \1/g')
+
+
+~~~
+
+

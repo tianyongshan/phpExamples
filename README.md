@@ -3495,3 +3495,73 @@ sudo strace -f $(pidof php-fpm7.0 | sed 's/\([0-9]*\)/\-p \1/g')
 ~~~
 
 
+
+##  php-fpm status
+~~~
+  sudo vim /etc/php/7.0/fpm/pool.d/www.conf  
+  pm.status_path = /status
+  sudo systemctl reload php7.0-fpm
+  sudo vim /etc/nginx/sites-enabled/example.com 
+   location ~ ^/(status|ping)$ {
+                allow 127.0.0.1;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_index index.php;
+                include fastcgi_params;
+                #fastcgi_pass 127.0.0.1:9000;
+                fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+        }
+
+sudo systemctl reload nginx
+http://49.232.126.145/status
+pool:                 www
+process manager:      dynamic
+start time:           26/Nov/2020:19:43:58 +0800
+start since:          535
+accepted conn:        10
+listen queue:         0
+max listen queue:     0
+listen queue len:     0
+idle processes:       1
+active processes:     1
+total processes:      2
+max active processes: 1
+max children reached: 0
+slow requests:        0
+
+http://49.232.126.145/status?full 
+************************
+pid:                  1712
+state:                Running
+start time:           26/Nov/2020:19:43:58 +0800
+start since:          582
+requests:             11
+request duration:     106
+request method:       GET
+request URI:          /status?full
+content length:       0
+user:                 -
+script:               -
+last request cpu:     0.00
+last request memory:  0
+
+************************
+pid:                  1713
+state:                Idle
+start time:           26/Nov/2020:19:43:58 +0800
+start since:          582
+requests:             11
+request duration:     26725
+request method:       GET
+request URI:          /wordpress/index.php
+content length:       0
+user:                 -
+script:               /var/www/html/wordpress/index.php
+last request cpu:     74.84
+last request memory:  4194304
+
+
+~~~
+
+
+
+

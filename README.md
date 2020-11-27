@@ -3564,6 +3564,8 @@ https://www.tecmint.com/enable-monitor-php-fpm-status-in-nginx/
 
 ##  mysql  rank times
 ~~~
+注意：此种rank  如果间隔出现  会重新统计   所以用了  把一组数据 放在临时表  或者 根据rank 字段 排序  
+
 SELECT 
 	IF (
 		@name = follow.name , 
@@ -3668,6 +3670,52 @@ FROM
 WHERE 
 	attendance1.name = '田永山' 
 	AND DATE_FORMAT(attendance2.date, "%Y-%m") = '2020-11' ;
+
+
+SELECT
+		follow.*,
+	IF (
+		@name = follow.name
+		AND @ptype = follow.state,
+		@rank :=@rank + 1 ,@rank := 1
+	) AS cou,
+	@name := follow.name,
+	@ptype := follow.state
+FROM
+	(
+		SELECT 
+				attendance1.name, 
+				attendance1.date  , 
+				attendance2.date as '昨日', 
+				attendance1.begin_time as '今天早打卡', 
+				attendance1.end_time as '今天晚打卡', 
+				attendance2.begin_time as '昨日早打卡', 
+				attendance2.end_time as '昨日晚打卡', 
+				DATE_FORMAT(
+					attendance1.begin_time, "%H-%i-%s"
+				), 
+				 
+				IF(
+					DATE_FORMAT(
+						attendance1.begin_time, "%H-%i-%s"
+					)> '09-30-00', 
+					'晚了', 
+					'正常'
+				) as state 
+			FROM 
+				sales__attendance as attendance1 
+				LEFT JOIN sales__attendance as attendance2 ON attendance1.name = attendance2.name 
+				AND DATE_ADD(attendance1.date, INTERVAL -1 DAY) = attendance2.date 
+			WHERE 
+				attendance1.name = '田永山' 
+				AND DATE_FORMAT(attendance2.date, "%Y-%m") = '2020-11'
+				ORDER BY  state
+		) follow,
+		(
+			SELECT
+				@rownum := 0,
+				@name := NULL ,@ptype := NULL ,@rank := 0
+		) a  ;    
 ~~~
 
 

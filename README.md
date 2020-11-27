@@ -3716,6 +3716,65 @@ FROM
 				@rownum := 0,
 				@name := NULL ,@ptype := NULL ,@rank := 0
 		) a  ;    
+
+
+redis counter ;
+
+
+SELECT 
+	attendance1.name, 
+	attendance1.id as id2, 
+	attendance1.date, 
+	attendance2.date as '昨日', 
+	attendance1.begin_time as '今天早打卡', 
+	attendance1.end_time as '今天晚打卡', 
+	attendance2.begin_time as '昨日早打卡', 
+	attendance2.end_time as '昨日晚打卡', 
+	DATE_FORMAT(
+		attendance1.begin_time, "%H-%i-%s"
+	), 
+	IF(
+		DATE_FORMAT(
+			attendance1.begin_time, "%H-%i-%s"
+		)> '09-30-00', 
+		'晚了', 
+		'正常'
+	) as state2, 
+	(
+		select 
+			SUM(1) 
+		from 
+			(
+				SELECT 
+					IF(
+						DATE_FORMAT(
+							attendance11.begin_time, "%H-%i-%s"
+						)> '09-30-00', 
+						'晚了', 
+						'正常'
+					) as state1, 
+					attendance11.id 
+				FROM 
+					sales__attendance as attendance11 
+					LEFT JOIN sales__attendance as attendance2 ON attendance11.name = attendance2.name 
+					AND DATE_ADD(
+						attendance11.date, INTERVAL -1 DAY
+					) = attendance2.date 
+				WHERE 
+					attendance11.name = '田永山' 
+					AND DATE_FORMAT(attendance2.date, "%Y-%m") = '2020-11'
+			) as tmp 
+		where 
+			tmp.state1 = state2 
+			AND tmp.id <= id2
+	) AS count_by_id 
+FROM 
+	sales__attendance as attendance1 
+	LEFT JOIN sales__attendance as attendance2 ON attendance1.name = attendance2.name 
+	AND DATE_ADD(attendance1.date, INTERVAL -1 DAY) = attendance2.date 
+WHERE 
+	attendance1.name = '田永山' 
+	AND DATE_FORMAT(attendance2.date, "%Y-%m") = '2020-11' ;
 ~~~
 
 

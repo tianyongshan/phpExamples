@@ -3559,7 +3559,7 @@ script:               /var/www/html/wordpress/index.php
 last request cpu:     74.84
 last request memory:  4194304
 
-
+https://www.tecmint.com/enable-monitor-php-fpm-status-in-nginx/
 ~~~
 
 

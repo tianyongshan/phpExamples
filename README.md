@@ -3562,6 +3562,33 @@ last request memory:  4194304
 https://www.tecmint.com/enable-monitor-php-fpm-status-in-nginx/
 ~~~
 
+##  mysql  rank times
+~~~
+SELECT 
+	IF (
+		@name = follow.name , 
+		@rank := @rank + 1, 
+		@rank := 1
+	) AS cou, 
+	@name := follow.name 
+FROM 
+	(
+		SELECT 
+			id, 
+			name 
+		FROM 
+			sales__attendance 
+		
+		LIMIT 
+			200
+	) as follow, 
+	(
+		SELECT 
+			
+			@name := NULL,  
+			@rank := 0
+	) a ;
+~~~
 
 
 

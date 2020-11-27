@@ -3588,6 +3588,86 @@ FROM
 			@name := NULL,  
 			@rank := 0
 	) a ;
+
+
+    
+SELECT 
+	attendance1.name, 
+	attendance1.date as '今天', 
+	attendance2.date as '昨日', 
+	attendance1.begin_time as '今天早打卡', 
+	attendance1.end_time as '今天晚打卡', 
+	attendance2.begin_time as '昨日早打卡', 
+
+	attendance2.end_time as '昨日晚打卡', 
+	DATE_FORMAT(
+		attendance1.begin_time, "%H-%i-%s"
+	), 
+	IF(
+		DATE_FORMAT(
+			attendance1.begin_time, "%H-%i-%s"
+		)> '09-30-00', 
+		'晚了', 
+		'正常'
+	) as state ,
+	rank_info.cou
+FROM 
+	sales__attendance as attendance1 
+	LEFT JOIN sales__attendance as attendance2 ON attendance1.name = attendance2.name 
+	AND DATE_ADD(attendance1.date, INTERVAL -1 DAY) = attendance2.date 
+	left JOIN (
+		SELECT
+		follow.*,
+	IF (
+		@name = follow.name
+		AND @ptype = follow.state,
+		@rank :=@rank + 1 ,@rank := 1
+	) AS cou,
+	@name := follow.name,
+	@ptype := follow.state
+FROM
+	(
+		SELECT 
+				attendance1.name, 
+				attendance1.date  , 
+				attendance2.date as '昨日', 
+				attendance1.begin_time as '今天早打卡', 
+				attendance1.end_time as '今天晚打卡', 
+				attendance2.begin_time as '昨日早打卡', 
+				attendance2.end_time as '昨日晚打卡', 
+				DATE_FORMAT(
+					attendance1.begin_time, "%H-%i-%s"
+				), 
+				'晚了' as  state
+				-- IF(
+				-- 	DATE_FORMAT(
+				-- 		attendance1.begin_time, "%H-%i-%s"
+				-- 	)> '09-30-00', 
+				-- 	'晚了', 
+				-- 	'正常'
+				-- ) as state 
+			FROM 
+				sales__attendance as attendance1 
+				LEFT JOIN sales__attendance as attendance2 ON attendance1.name = attendance2.name 
+				AND DATE_ADD(attendance1.date, INTERVAL -1 DAY) = attendance2.date 
+			WHERE 
+				attendance1.name = '田永山' 
+				AND DATE_FORMAT(attendance2.date, "%Y-%m") = '2020-11'
+				AND  DATE_FORMAT(
+						attendance1.begin_time, "%H-%i-%s"
+					)> '09-30-00' 
+		) follow,
+		(
+			SELECT
+				@rownum := 0,
+				@name := NULL ,@ptype := NULL ,@rank := 0
+		) a 
+	) as  rank_info 
+	ON  attendance1.name = rank_info.name 
+	AND attendance1.date  = rank_info.date 
+WHERE 
+	attendance1.name = '田永山' 
+	AND DATE_FORMAT(attendance2.date, "%Y-%m") = '2020-11' ;
 ~~~
 
 

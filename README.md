@@ -3779,3 +3779,96 @@ WHERE
 
 
 
+## mysql  change log
+~~~
+CREATE TABLE data (
+	  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	  timestamp   TIMESTAMP,
+	  data1 VARCHAR(255) NOT NULL,
+	  data2  DECIMAL(5,2) NOT NULL 
+);
+ 
+CREATE TABLE data_log (
+	  action VARCHAR(255),
+	  action_time   TIMESTAMP NULL DEFAULT NULL,
+	  id INT,
+	  timestamp   TIMESTAMP NULL DEFAULT NULL,
+	  data1 VARCHAR(255) NULL,
+	  data2  DECIMAL(5,2) NULL 
+);
+
+
+
+DROP TRIGGER IF EXISTS ai_data;
+
+DELIMITER $$
+
+CREATE TRIGGER ai_data AFTER INSERT ON data
+FOR EACH ROW
+BEGIN
+  INSERT INTO data_log (action, action_time, id, timestamp, data1, data2)
+  VALUES('insert', NOW(), NEW.id, NEW.timestamp, NEW.data1, NEW.data2);
+END$$
+
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS au_data;
+
+DELIMITER $$
+
+CREATE TRIGGER au_data AFTER UPDATE ON data
+FOR EACH ROW
+BEGIN
+  INSERT INTO data_log (action, action_time, id, timestamp, data1, data2)
+  VALUES('update', NOW(), NEW.id, NEW.timestamp, NEW.data1, NEW.data2);
+END$$
+
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS ad_data;
+
+DELIMITER $$
+
+CREATE TRIGGER ad_data AFTER DELETE ON data
+FOR EACH ROW
+BEGIN
+  INSERT INTO data_log (action, action_time, id, timestamp, data1, data2)
+  VALUES('delete',NOW(), OLD.id, OLD.timestamp, OLD.data1, OLD.data2);
+END$$
+
+
+DELIMITER ;
+
+
+
+INSERT INTO data (timestamp, data1, data2)
+VALUES ('2018-10-03 15:23:54', 'some text', 45.28);
+
+UPDATE data
+SET data1 = 'updated value'
+WHERE data2 = 45.28;
+
+DELETE FROM data
+WHERE data1 = 'updated value';
+
+
+SELECT * FROM data_log;
+
+~~~
+
+
+##  php  mysql   dbv
+
+~~~
+git clone https://github.com/victorstanciu/dbv.git
+
+config.php:用户名加密码
+
+/dbv/data/revisions/1
+注意：需要是数字 
+ update.sql
+即可 （注意文件权限）
+
+
+
+~~~

@@ -3860,6 +3860,7 @@ SELECT * FROM data_log;
 ##  php  mysql   dbv
 
 ~~~
+https://dbv.vizuina.com/documentation/#usage-schema-create
 git clone https://github.com/victorstanciu/dbv.git
 
 config.php:用户名加密码

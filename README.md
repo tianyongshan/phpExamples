@@ -3941,6 +3941,50 @@ ORDER BY
 
 
 
+CREATE TABLE IF NOT EXISTS `marksheets` (
+		`id` int(11) NOT NULL, 
+		`sales_id` int(11) NOT NULL DEFAULT '0', 
+		`name` varchar(20) COLLATE utf8_unicode_ci NOT NULL COMMENT '纷享名称', 
+		`date` date NOT NULL, 
+		`score` int(11) DEFAULT '0' COMMENT '工作时长单位秒', 
+		`state` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:正常 1:无效', 
+		`del_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:正常 1:无效', 
+		`remark` varchar(255) COLLATE utf8_unicode_ci NOT NULL, 
+		`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+		`update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	) ENGINE = MyISAM AUTO_INCREMENT = 3262 DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci  ; 
+    
+INSERT INTO `marksheets` (
+		`id`, `sales_id`, `name`, `date`, `score`, 
+		`state`, `del_flag`, `remark`, `create_time`, 
+		`update_time`
+	) 
+VALUES 
+	(
+		3261, 0, 'A', '2020-10-20', 90, 0, 0, 
+		'', '2020-10-23 02:29:43', '2020-12-01 14:58:07'
+	), 
+	(
+		3260, 0, 'A', '2020-10-20', 80, 0, 0, 
+		'', '2020-10-23 02:29:39', '2020-12-01 15:16:28'
+	), 
+	(
+		3259, 0, 'B', '2020-10-21', 80, 0, 0, 
+		'', '2020-10-23 02:29:35', '2020-12-01 15:16:32'
+	), 
+	(
+		3257, 0, 'B', '2020-10-21', 100, 0, 0, 
+		'', '2020-10-23 02:29:26', '2020-12-01 15:16:36'
+	), 
+	(
+		3258, 0, 'C', '2020-10-22', 90, 0, 0, 
+		'', '2020-10-23 02:29:30', '2020-12-01 15:16:40'
+	), 
+	(
+		3256, 0, 'C', '2020-10-22', 100, 0, 0, 
+		'', '2020-10-23 02:29:22', '2020-12-01 15:16:43'
+	);
+
 
 SELECT 
 	name, 

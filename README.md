@@ -3873,3 +3873,97 @@ config.php:用户名加密码
 
 
 ~~~
+
+
+## mysql  variable
+~~~
+
+-- 定义一个变量 存放学生总数
+set  @totalStudents = 0;  
+
+-- 把学生总数查出来 放进变量里
+select 
+	count(*) into @totalStudents 
+from 
+	marksheets; 
+    
+-- 把学生总数查出来	
+select 
+	@totalStudents, @totalStudents 
+from 
+	marksheets; 
+    
+    
+SELECT 
+	id, 
+	score, 
+	-- 按照分数排序后 依次排名 
+	@curRank := @curRank +1  AS rank ,
+	-- 排名对应的分数
+	@orderScore := score 
+FROM 
+	marksheets, 
+	-- 初始化变量
+	(
+		SELECT 
+			@curRank := 0, 
+			@orderScore := null, 
+			@studentNumber := 1, 
+			@percentile := 100
+	) r 
+ORDER BY 
+	score DESC ;
+
+--  上述方式漏洞： 两人同一个分数  应该并列第一   
+
+SELECT 
+	id, 
+	score, 
+	-- 如果第二个人的分数 和上次排名的分数一致  那就并列排名  否则就直接按照排序的顺序
+	@curRank := IF(@orderScore = score ,@curRank,@orderNumber)   AS rank ,
+    -- 排序后的顺序
+	@orderNumber := @orderNumber + 1 as orderNumber, 
+	-- 排序依据的分数
+	@orderScore := score 
+FROM 
+	marksheets, 
+	-- 初始化变量
+	(
+		SELECT 
+			@curRank := 0, 
+			@orderScore := null, 
+			@orderNumber := 1, 
+			@percentile := 100
+	) r 
+ORDER BY 
+	score DESC ;
+
+
+
+
+
+SELECT 
+	name, 
+    score,
+	@rank := IF(@score = score,@rank,@orderByNum) ,
+    @score := score,
+    @orderByNum :=@orderByNum+1
+FROM 
+	(
+		SELECT 
+			max(score) as score, 
+			name 
+		FROM 
+			marksheets 
+		GROUP by 
+			name
+	) as tmp_score, 
+	(
+		SELECT 
+			@rank := 1,
+            @score := 0,
+        	@orderByNum := 1
+	) as variable 
+order by 
+	tmp_score.score desc ;
+~~~

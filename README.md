@@ -4011,3 +4011,72 @@ FROM
 order by 
 	tmp_score.score desc ;
 ~~~
+
+
+##  mysql  explode 
+~~~ 
+
+db1 存的 company_member_ids：
+29,30,4233,140,141,142,143,182,184,183,237,238,239
+
+
+db2 存的 company_member_ids：
+30,4233,140,141,142,143,182,184,183,237,238,239
+
+想比较差异
+把字符串按照逗号拆分成多个值，然后入到临时表 比较
+
+按照位置取值：
+SELECT 
+	SUBSTRING_INDEX(company_member_ids, ',', 6),
+    SUBSTRING_INDEX(SUBSTRING_INDEX(company_member_ids,',',1),',',-1) ,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(company_member_ids,',',2),',',-1) ,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(company_member_ids,',',3),',',-1) ,
+	SUBSTRING_INDEX(SUBSTRING_INDEX(company_member_ids,',',4),',',-1)   
+FROM 
+	service__income_month 
+WHERE 
+	`type` = '20' 
+	AND `month` = '2020-10' 
+	AND `admin_id` = '1100' 
+LIMIT 
+	1;
+
+
+总共是490个值：
+用loop 循环：
+DROP PROCEDURE IF EXISTS tysTestExplode;
+DELIMITER ;;
+CREATE PROCEDURE tysTestExplode()
+BEGIN
+DECLARE n INT DEFAULT 459;
+DECLARE i INT DEFAULT 0;
+-- SELECT COUNT(*) FROM table_A INTO n;
+ 
+SET i=0;
+WHILE i<n DO 
+   REPLACE INTO reflush_data_ids2 (record_id)  
+  SELECT  
+    SUBSTRING_INDEX(SUBSTRING_INDEX(company_member_ids,',',i),',',-1)  
+FROM 
+	service__income_month 
+WHERE 
+	`type` = '20' 
+	AND `month` = '2020-10' 
+	AND `admin_id` = '1100' 
+LIMIT 
+	1 ;
+  SET i = i + 1;
+END WHILE;
+End;
+
+结束后：重置符号
+DELIMITER ;;
+然后调用
+CALL tysTestExplode();	
+就可以了；
+
+
+
+
+~~~

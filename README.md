@@ -4080,3 +4080,24 @@ CALL tysTestExplode();
 
 
 ~~~
+
+
+
+## mysql group concat 
+~~~
+ GROUP_CONCAT:
+ 1:默认长度有限  会导致显示不全
+ show variables like 'group_concat_max_len' 
+ 2：去重（也可排序）
+ SELECT 
+	GROUP_CONCAT(
+		DISTINCT(company_id) SEPARATOR ','
+	) 
+FROM 
+	`agreements__order` 
+WHERE 
+	company_id = 4844 
+GROUP by 
+	company_id 
+
+~~~

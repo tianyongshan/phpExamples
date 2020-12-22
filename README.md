@@ -4098,6 +4098,64 @@ FROM
 WHERE 
 	company_id = 4844 
 GROUP by 
-	company_id 
+	company_id  
+~~~
+
+
+## mysql group by speed  up 
+~~~
+
+原始语句：
+select 
+	a.name, 
+	sum(a.count) aSum, 
+	avg(a.position) aAVG, 
+	b.col1, 
+	c.col2, 
+	d.col3 
+from 
+	a 
+	join b on (a.bid = b.id) 
+	join c on (a.cid = c.id) 
+	join d on (a.did = d.id) 
+group by 
+	a.name, 
+	b.id, 
+	c.id, 
+	d.id ;
+
+We need all of the information from table a for the “group by” 
+but we don’t need to execute all the joins before clustering them.
+优化后：
+select 
+	a.name, 
+	aSum, 
+	aAVG, 
+	b.col1, 
+	c.col2, 
+	d.col3 
+from 
+	(
+		select 
+			name, 
+			sum(count) aSum, 
+			avg(position) aAVG, 
+			bid, 
+			cid, 
+			did 
+		from 
+			a 
+		group by 
+			name, 
+			bid, 
+			cid, 
+			did
+	) a 
+	join b on (a.bid = b.id) 
+	join c on (a.cid = c.id) 
+	join d on (a.did = d.id) ;
+
+
+
 
 ~~~

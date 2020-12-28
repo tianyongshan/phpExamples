@@ -4159,3 +4159,18 @@ from
 
 
 ~~~
+
+
+## mysql user variables
+~~~
+SELECT  id   INTO @firstId  FROM   admin__user  WHERE  admin_name  in  (
+
+'田永山'
+
+)  LIMIT  1   
+;
+SELECT   @firstId ;
+
+ 
+
+~~~

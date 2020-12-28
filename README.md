@@ -4174,3 +4174,33 @@ SELECT   @firstId ;
  
 
 ~~~
+ 
+~~~
+
+
+SELECT 
+	id INTO @minId1 
+FROM 
+	company__third_clues_contact 
+WHERE 
+	create_time >= '2020-09-01 00:00:00' 
+LIMIT 
+	1; 
+SELECT 
+	id INTO @maxId1 
+FROM 
+	company__third_clues_contact 
+WHERE 
+	create_time >= '2020-10-01 00:00:00' 
+LIMIT 
+	1; 
+SELECT 
+	* 
+FROM 
+	company__third_clues_contact 
+WHERE 
+	id >= @minId1 
+	AND id <= @maxId1 ;
+
+
+~~~

@@ -4205,3 +4205,12 @@ WHERE
 
 
 ~~~
+
+
+## ANALYZE TABLE  
+~~~
+
+large  table ,  执行优化
+ANALYZE TABLE company__third_party_clues_base_info ;
+
+~~~

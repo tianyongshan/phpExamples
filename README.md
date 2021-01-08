@@ -4250,6 +4250,8 @@ CALL deleRecords();
 DELIMITER ;
 
 
+SELECT SLEEP(1);
+
 ~~~
 
 ##  display  cdn files with login

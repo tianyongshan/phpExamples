@@ -4214,3 +4214,63 @@ large  table ,  执行优化
 ANALYZE TABLE company__third_party_clues_base_info ;
 
 ~~~
+
+## QUICK  DELETE 
+~~~
+SET foreign_key_checks = 0;
+/* ... your query ... */
+SET foreign_key_checks = 1;
+
+
+ALTER TABLE a DISABLE KEYS
+/* ... your query ... */
+ALTER TABLE a ENABLE KEYS 
+
+
+DELIMITER ;;
+CREATE PROCEDURE deleRecords()
+BEGIN
+DECLARE n INT DEFAULT 10;
+DECLARE i INT DEFAULT 1;
+ 
+-- SELECT COUNT(*) FROM table_A INTO n;
+ 
+SET i=1;
+WHILE i<n DO 
+   DELETE QUICK FROM reflush_data_ids WHERE 
+   id >=i
+   AND id <=(i+5) 
+  ;
+  SET i = i + 5;
+END WHILE;
+End;;
+
+SHOW PROCEDURE STATUS ;
+CALL deleRecords();
+DELIMITER ;
+
+
+~~~
+
+##  display  cdn files with login
+~~~
+     public function displayCdnFile($request, $response)
+    {
+
+        \AtTools::displayCdnFile(
+            $request->domain_name,
+            $request->file_path
+        );
+       
+    }
+
+    /** 
+	  简易版 通过路径展示文件
+	*/
+	static function displayCdnFile($domainName,$filePath){
+		header("Content-type: application/pdf");
+        header("Content-Disposition: inline; filename=0efae8ba05989c3879f77465cd690a98.pdf");
+        @readfile($domainName.$filePath);
+	}
+
+~~~

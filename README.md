@@ -1301,7 +1301,9 @@ find Downloads/ -type f -size +4G
 查找文件夹
 find /WORK -name "udf"
 
+找到子文件里包含gif的文件 删除
 
+ find   . -name '*.gif'  -delete
 
 ~~~
 

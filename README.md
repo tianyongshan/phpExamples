@@ -1284,6 +1284,11 @@ top -c -n 1
 
 ps -f -p 11818 
 
+
+top c 
+
+一堆 apache 或者 nginx  ：apache 拥堵
+
 keyword 关键字：What the full process thats running?
 ~~~
 

@@ -4292,3 +4292,18 @@ ps aux | grep while | grep -v grep | awk '{print $2}' | xargs kill
 
 
 ~~~
+
+
+## locate
+~~~
+  locate nginx.conf
+
+~~~
+
+## git config 
+~~~
+
+git config --global user.name "your username"
+
+git config --global user.password "your password"
+~~~

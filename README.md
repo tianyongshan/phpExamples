@@ -4278,3 +4278,12 @@ SELECT SLEEP(1);
 	}
 
 ~~~
+
+
+## KILL ALL AFTER GREP 
+~~~
+while:关键词
+ps aux | grep while | grep -v grep | awk '{print $2}' | xargs kill
+
+
+~~~

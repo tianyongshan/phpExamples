@@ -4306,4 +4306,434 @@ ps aux | grep while | grep -v grep | awk '{print $2}' | xargs kill
 git config --global user.name "your username"
 
 git config --global user.password "your password"
+
+
+
 ~~~
+
+
+## mysql logger
+~~~
+
+create  table  agreements_ad_history like  agreements;   
+    DROP TRIGGER IF EXISTS agreements_ad_triggers ;
+
+    DELIMITER $$ 
+   CREATE TRIGGER agreements_ad_triggers BEFORE DELETE ON agreements FOR EACH ROW BEGIN INSERT INTO agreements_ad_history 
+SELECT 
+  `id`, 
+  `order_id`, 
+  `fxiaoke_id`, 
+  `fxiaoke_id_old`, 
+  `fxiaoke_sync`, 
+  `company_id`, 
+  `stage`, 
+  `contract_subject`, 
+  `company_id_accredit`, 
+  `agreement_no`, 
+  `money`, 
+  `money_total`, 
+  `card_money`, 
+  `card_remark`, 
+  `examin_money`, 
+  `examin_remark`, 
+  `service_money`, 
+  `year_num`, 
+  `order_type`, 
+  `order_time`, 
+  `sign_year`, 
+  `sign_date`, 
+  `sign_type`, 
+  `renewal_type`, 
+  `tag`, 
+  `agreement_file`, 
+  `agreement_tpl`, 
+  `pay_type`, 
+  `charger`, 
+  `charger_mobile`, 
+  `charger_mail`, 
+  `sales_id`, 
+  `department_id`, 
+  `department_id_rollin`, 
+  `department_id_other`, 
+  `marketer_id`, 
+  `marketer_id_rollin`, 
+  `marketer`, 
+  `marketer_mail`, 
+  `service_personal`, 
+  `ag_contact_json`, 
+  `bill_money`, 
+  `begin_date`, 
+  `member_ss`, 
+  `local_province`, 
+  `local_city`, 
+  `local_area`, 
+  `local_province_id`, 
+  `local_city_id`, 
+  `local_district_id`, 
+  `is_goutong`, 
+  `is_tomail`, 
+  `todo_state`, 
+  `todo_date_complete`, 
+  `todo_info`, 
+  `total_pm`, 
+  `need_pm`, 
+  `money_pm`, 
+  `need_p`, 
+  `setted_pm`, 
+  `setted_p`, 
+  `handle_note`, 
+  `report_state`, 
+  `employment_sign_contract_personal`, 
+  `renew_state`, 
+  `renew_note`, 
+  `show_renew`, 
+  `dispatch_cid`, 
+  `first_pay_day`, 
+  `apply_position`, 
+  `apply_shebao`, 
+  `need_funds`, 
+  `state`, 
+  `create_time`, 
+  `update_time`, 
+  `del_flag`, 
+  `remark` 
+FROM 
+  agreements 
+WHERE 
+  id = OLD.id ; END $$
+
+DELIMITER  ;
+
+
+    create  table  agreements_ai_history like  agreements;
+    DROP TRIGGER IF EXISTS agreements_ai_triggers ;
+
+	DELIMITER $$ 
+	CREATE TRIGGER agreements_ai_triggers after 
+	INSERT 
+	ON agreements FOR each row BEGIN 
+	INSERT INTO agreements_ai_history 
+	SELECT 
+		`id`, 
+		`order_id`, 
+		`fxiaoke_id`, 
+		`fxiaoke_id_old`, 
+		`fxiaoke_sync`, 
+		`company_id`, 
+		`stage`, 
+		`contract_subject`, 
+		`company_id_accredit`, 
+		`agreement_no`, 
+		`money`, 
+		`money_total`, 
+		`card_money`, 
+		`card_remark`, 
+		`examin_money`, 
+		`examin_remark`, 
+		`service_money`, 
+		`year_num`, 
+		`order_type`, 
+		`order_time`, 
+		`sign_year`, 
+		`sign_date`, 
+		`sign_type`, 
+		`renewal_type`, 
+		`tag`, 
+		`agreement_file`, 
+		`agreement_tpl`, 
+		`pay_type`, 
+		`charger`, 
+		`charger_mobile`, 
+		`charger_mail`, 
+		`sales_id`, 
+		`department_id`, 
+		`department_id_rollin`, 
+		`department_id_other`, 
+		`marketer_id`, 
+		`marketer_id_rollin`, 
+		`marketer`, 
+		`marketer_mail`, 
+		`service_personal`, 
+		`ag_contact_json`, 
+		`bill_money`, 
+		`begin_date`, 
+		`member_ss`, 
+		`local_province`, 
+		`local_city`, 
+		`local_area`, 
+		`local_province_id`, 
+		`local_city_id`, 
+		`local_district_id`, 
+		`is_goutong`, 
+		`is_tomail`, 
+		`todo_state`, 
+		`todo_date_complete`, 
+		`todo_info`, 
+		`total_pm`, 
+		`need_pm`, 
+		`money_pm`, 
+		`need_p`, 
+		`setted_pm`, 
+		`setted_p`, 
+		`handle_note`, 
+		`report_state`, 
+		`employment_sign_contract_personal`, 
+		`renew_state`, 
+		`renew_note`, 
+		`show_renew`, 
+		`dispatch_cid`, 
+		`first_pay_day`, 
+		`apply_position`, 
+		`apply_shebao`, 
+		`need_funds`, 
+		`state`, 
+		`create_time`, 
+		`update_time`, 
+		`del_flag`, 
+		`remark` 
+	FROM 
+		agreements
+	WHERE  id = new.id ; 
+
+	end $$
+	
+	DELIMITER ; 
+
+
+
+    CREATE TABLE `data_tracking` (
+  `tracking_id` int(11) NOT NULL AUTO_INCREMENT, 
+  `data_id` int(11) NOT NULL, 
+  `field` varchar(50) NOT NULL, 
+  `old_value` int(11) NOT NULL, 
+  `new_value` int(11) NOT NULL, 
+  `modified` datetime NOT NULL, 
+  `table_name` varchar(80) NOT NULL DEFAULT '', 
+  PRIMARY KEY (`tracking_id`), 
+  KEY `name_id` (`table_name`, `data_id`)
+) ENGINE = MyISAM DEFAULT CHARSET = latin1
+
+
+	DELIMITER $$
+
+	DROP TRIGGER IF EXISTS  `agreements_au_triggers ` $$
+
+	CREATE TRIGGER `agreements_au_triggers` 
+after 
+UPDATE 
+  ON `agreements` FOR each row BEGIN IF (new.order_id != old.order_id) THEN INSERT INTO data_tracking (
+    `data_id`, `field`, `old_value`, `new_value`, 
+    `modified`, `table_name`
+  ) 
+VALUES 
+  (
+    new.id, "order_id", old.order_id, 
+    new.order_id, now(), 'agreements'
+  );
+end IF;
+IF (new.company_id != old.company_id) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "company_id", old.company_id, 
+    new.company_id, now(), 'agreements'
+  );
+END IF;
+IF (
+  new.company_id_accredit != old.company_id_accredit
+) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "company_id_accredit", 
+    old.company_id_accredit, new.company_id_accredit, 
+    now(), 'agreements'
+  );
+END IF; 
+IF (
+  new.contract_subject != old.contract_subject
+) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "contract_subject", 
+    old.contract_subject, new.contract_subject, 
+    now(), 'agreements'
+  );
+END IF;
+IF (
+  new.agreement_no != old.agreement_no
+) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "agreement_no", old.agreement_no, 
+    new.agreement_no, now(), 'agreements'
+  );
+END IF;
+IF (new.money != old.money) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "money", old.money, new.money, 
+    now(), 'agreements'
+  );
+END IF;
+IF (new.year_num != old.year_num) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "year_num", old.year_num, 
+    new.year_num, now(), 'agreements'
+  );
+END IF;
+IF (new.sign_year != old.sign_year) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "sign_year", old.sign_year, 
+    new.sign_year, now(), 'agreements'
+  );
+END IF;
+IF (new.sign_date != old.sign_date) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "sign_date", old.sign_date, 
+    new.sign_date, now(), 'agreements'
+  );
+END IF;
+IF (new.sign_date != old.sign_date) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "sign_date", old.sign_date, 
+    new.sign_date, now(), 'agreements'
+  );
+END IF;
+IF (
+  new.marketer_id != old.marketer_id
+) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "marketer_id", old.marketer_id, 
+    new.marketer_id, now(), 'agreements'
+  );
+END IF;
+IF (
+  new.marketer_id_rollin != old.marketer_id_rollin
+) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "marketer_id_rollin", 
+    old.marketer_id_rollin, new.marketer_id_rollin, 
+    now(), 'agreements'
+  );
+END IF;
+IF (
+  new.marketer_id_rollin != old.marketer_id_rollin
+) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "marketer_id_rollin", 
+    old.marketer_id_rollin, new.marketer_id_rollin, 
+    now(), 'agreements'
+  );
+END IF;
+IF (new.need_pm != old.need_pm) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "need_pm", old.need_pm, 
+    new.need_pm, now(), 'agreements'
+  );
+END IF;
+IF (new.money_pm != old.money_pm) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "money_pm", old.money_pm, 
+    new.money_pm, now(), 'agreements'
+  );
+END IF;
+IF (new.need_p != old.need_p) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "need_p", old.need_p, 
+    new.need_p, now(), 'agreements'
+  );
+END IF;
+IF (new.setted_p != old.setted_p) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "setted_p", old.setted_p, 
+    new.setted_p, now(), 'agreements'
+  );
+END IF;
+IF (new.setted_p != old.setted_p) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "setted_p", old.setted_p, 
+    new.setted_p, now(), 'agreements'
+  );
+END IF;
+IF (
+  new.dispatch_cid != old.dispatch_cid
+) then INSERT INTO data_tracking (
+  `data_id`, `field`, `old_value`, `new_value`, 
+  `modified`, `table_name`
+) 
+VALUES 
+  (
+    new.id, "dispatch_cid", old.dispatch_cid, 
+    new.dispatch_cid, now(), 'agreements'
+  );
+END IF;
+END $$
+
+
+	DELIMITER ;
+
+    
+~~~ 

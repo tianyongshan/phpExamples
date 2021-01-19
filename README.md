@@ -1113,7 +1113,20 @@ change master to master_log_file='binlog.000021' , master_log_pos=676992028;
 start slave;
 
 
+ sudo mysqlbinlog /var/lib/mysql/VM-0-4-ubuntu-bin.000002 --start-position 74401248 --stop-position 74401286    -v --base64-output=DECODE-ROWS
+
+
+ sudo mysqlbinlog /var/lib/mysql/VM-0-4-ubuntu-bin.000002    -v --base64-output=DECODE-ROWS
+
+
+
+/etc/init.d/mysql start
+sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
+show variables like 'datadir';
+
+
 ~~~
+ 
 
 
 ## VIEW  view
@@ -4737,3 +4750,4 @@ END $$
 
     
 ~~~ 
+

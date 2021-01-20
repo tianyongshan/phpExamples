@@ -1125,6 +1125,35 @@ sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
 show variables like 'datadir';
 
 
+
+mysql> show binlog events in 'VM-0-4-ubuntu-bin.000004' from  418  limit  10 ;
++--------------------------+-----+------------+-----------+-------------+---------------------------------+
+| Log_name                 | Pos | Event_type | Server_id | End_log_pos | Info                            |
++--------------------------+-----+------------+-----------+-------------+---------------------------------+
+| VM-0-4-ubuntu-bin.000004 | 418 | Write_rows |         0 |         467 | table_id: 110                   |
+| VM-0-4-ubuntu-bin.000004 | 467 | Write_rows |         0 |         527 | table_id: 112 flags: STMT_END_F |
+| VM-0-4-ubuntu-bin.000004 | 527 | Xid        |         0 |         558 | COMMIT /* xid=237 */            |
+| VM-0-4-ubuntu-bin.000004 | 558 | Rotate     |         0 |         613 | VM-0-4-ubuntu-bin.000005;pos=4  |
+
+如果不可见具体的sql
+
+sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf 
+binlog_format=mixed
+
+mysql> show binlog events in 'VM-0-4-ubuntu-bin.000007' ;
++--------------------------+-----+----------------+-----------+-------------+-------------------------------------------------------------------------+
+| Log_name                 | Pos | Event_type     | Server_id | End_log_pos | Info                                                                    |
++--------------------------+-----+----------------+-----------+-------------+-------------------------------------------------------------------------+
+| VM-0-4-ubuntu-bin.000007 |   4 | Format_desc    |         0 |         123 | Server ver: 5.7.32-0ubuntu0.16.04.1-log, Binlog ver: 4                  |
+| VM-0-4-ubuntu-bin.000007 | 123 | Previous_gtids |         0 |         154 |                                                                         |
+| VM-0-4-ubuntu-bin.000007 | 154 | Anonymous_Gtid |         0 |         219 | SET @@SESSION.GTID_NEXT= 'ANONYMOUS'                                    |
+| VM-0-4-ubuntu-bin.000007 | 219 | Query          |         0 |         306 | BEGIN                                                                   |
+| VM-0-4-ubuntu-bin.000007 | 306 | Query          |         0 |         447 | use `test`; insert into `data` values (101,'2020-01-01 10:00:00','1',1) |
+| VM-0-4-ubuntu-bin.000007 | 447 | Xid            |         0 |         478 | COMMIT /* xid=21 */                 
+
+
+
+
 ~~~
  
 

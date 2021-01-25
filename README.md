@@ -862,7 +862,7 @@ ORDER BY
 
 
 
-mysql>  SHOW PROFILES;                                                                                                                                                                     
+mysql>  SHOW  PROFILES;                                                                                                                                                                     
  mysql> SHOW PROFILES;  
 +----------+-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Query_ID | Duration    | Query                                                                                                                                                                                                                                                                                 |
@@ -1043,6 +1043,7 @@ show binlog events in 'mysql-bin.000236' ;
 show binlog events in 'mysql-bin.000001'  limit 1000 ;
 
 info 里是实际执行的sql
+【config 需要设置为 binlog_format=mixed  才会展示执行的sql】
 
 ~~~ 
 
@@ -1113,6 +1114,7 @@ change master to master_log_file='binlog.000021' , master_log_pos=676992028;
 start slave;
 
 
+可读格式展示
  sudo mysqlbinlog /var/lib/mysql/VM-0-4-ubuntu-bin.000002 --start-position 74401248 --stop-position 74401286    -v --base64-output=DECODE-ROWS
 
 
@@ -1194,7 +1196,7 @@ SELECT  * FROM tab_1
 ~~~
 DELETE QUICK  FROM  table ;
 
-QUICK  & JOIN 
+QUICK  & JOIN  (结合使用)
 
 CREATE TABLE `tmp_ids` (
 	`id` int(11) NOT NULL AUTO_INCREMENT, 
@@ -1239,13 +1241,18 @@ $ git revert  104010a231c52a0169c62ae5488e4856d69cddd7
 
 ## grep split large log 
 ~~~
+扎到满足条件的开头位置
 cat  debug_db_20200828.log    | tail -n +1720000 | head -n 100  
+
+扎到满足条件的结束位置
 cat  debug_db_20200828.log    | tail -n +1920000 | head -n 100
 
 cat  debug_db_20200828.log    | tail -n +1720000 | head -n 200000 > tmp_0828.log
 
+压缩
 gzip tmp_0828.log
 
+下载
 sz -y tmp_0828.log.gz
 
 ~~~
@@ -1314,13 +1321,14 @@ ip route get 1.2.3.4 | awk '{print $7}'
 
 ~~~
 top 
-c 
-1 
+c 最占用性能的程序 （比如负载高 c之后全是mysql  说明是mysql的问题）
+1  几核
 
-load avg  :  <1 (或者2) 
-             <1*4 (或者2*4) 
-             <1*8 (或者2*8) 
+load avg  :  <1 (或者2)  单核
+             <1*4 (或者2*4)  4核
+             <1*8 (或者2*8)  
 
+注意 即使负载相对低 但是c之后全是一个程序 也是问题 比如 全是apache apache很可能会堵住
 
 top -c -n 1
 
@@ -1336,11 +1344,14 @@ keyword 关键字：What the full process thats running?
 
 ## df du  memeory
 ~~~
+磁盘占用
 new03 172.17.22.202 [var]$df -h
 
 new03 172.17.22.202 [var]$df -a
 
+文件大小（全部）
 new03 172.17.22.202 [var]$du -sh 
+每个文件的大小
 new03 172.17.22.202 [var]$du -h * 
 
 find ./ -type f -size +1G
@@ -1850,6 +1861,7 @@ $int = (int) filter_var($str, FILTER_SANITIZE_NUMBER_INT);
 
 ## PARTITIONS   EXAMPLE
 ~~~
+分区示例
  CREATE TABLE `company__third_party_clues_base_info` (
 	`id` int(11) NOT NULL AUTO_INCREMENT, 
 	`third_party_clues_id` int(11) DEFAULT NULL, 
@@ -2249,6 +2261,7 @@ SET `ensembl_transcript_id` = 'ENSORGT00000000001',
 
 ## SQL_NO_CACHE
 ~~~
+查询时强制不使用缓存
 SELECT SQL_NO_CACHE id FROM company
 
 ~~~
@@ -2597,7 +2610,7 @@ static function restructArrayIndexV2($array,$column1,$column2){
 
 ~~~
  
-## codec example
+## code example
 ~~~  
 static function transferMainAgToOrder($agId,$force=1){
 
@@ -2786,6 +2799,8 @@ SELECT
 
 ## mysql table version  
 ~~~
+mysql 数据变更备份
+
  CREATE TABLE IF NOT EXISTS `table1` (
   `id` int(11) NOT NULL,
    product VARCHAR(100) NOT NULL,
@@ -3013,6 +3028,7 @@ source ~/.bashrc
 
 ##   watch  every 5 seconds    
 ~~~
+服务器按时执行-6秒 
   watch -n 6   " curl    --request GET  'http://XXXX.org/?_c=crontab&_a=pullAllCompanysListsNewVersion&limit=1000'"
 ~~~
 
@@ -3021,6 +3037,7 @@ source ~/.bashrc
 
 ##   nginx  log formatt
 ~~~
+
 ubuntu@VM-0-4-ubuntu:/etc/nginx$ cat  nginx.conf 
 user www-data;
 worker_processes auto;
@@ -3175,6 +3192,7 @@ cat  access.log | awk '$26 > 0.01 && 0.03 > $6' | wc -l
 
  ## goaccess  nginx log 
 ~~~
+监控access log  
  sudo apt install goaccess 
 
  sudo vi  /etc/nginx/nginx.conf
@@ -3268,7 +3286,7 @@ Swap:            0B          0B          0B
 
 ## https page use http   source
 ~~~
-
+强制使用http的资源
  1:https跳转页面：https://mydomin.com/?_c=work&_a=test
  document.location.href ="http://cdn.aibangmang.org/media/images/logo.png";
  2:
@@ -3283,6 +3301,7 @@ Swap:            0B          0B          0B
 
 ## procedure kill_other_processes
 ~~~
+杀掉mysql连接
 SHOW PROCEDURE STATUS;
  show create procedure kill_other_processes;
 CALL kill_other_processes();
@@ -3319,6 +3338,7 @@ DELIMITER ;
 
 ## mysql safe mode 
 ~~~
+插入NULL的时候是否报错 
 
 show VARIABLES LIKE '%sql_mode%';
 select @@global.sql_mode ;
@@ -3330,7 +3350,8 @@ mysql  strict_mode. But it allowed not null when insert data .  not  return erro
 
 ##    MySQL Scheduled Event
 ~~~
-
+mysql 事件触发
+ 
 SET GLOBAL event_scheduler = ON;
  
  CREATE TABLE messages (
@@ -3388,6 +3409,7 @@ FROM
 
 ## php export xls  light class 
 ~~~
+快速导出excel 
 
 public function testXlsWriter3($request, $response)
     {  
@@ -3426,6 +3448,7 @@ public function testXlsWriter3($request, $response)
 
 ## php memory
 ~~~
+内存使用
         case 1:
         $model = new \model\Company();
         foreach ($record as $datum){
@@ -3531,6 +3554,7 @@ static function testYield($record){
 
 ##  strace
 ~~~
+全线追踪
  ps -ef|grep php  
 
 ubuntu   21352 21317 99 11:43 pts/1    00:00:02 /usr/bin/php7.0 while.php
@@ -3548,6 +3572,8 @@ sudo strace -f $(pidof php-fpm7.0 | sed 's/\([0-9]*\)/\-p \1/g')
 
 ##  php-fpm status
 ~~~
+追踪所有php请求及状态 
+
   sudo vim /etc/php/7.0/fpm/pool.d/www.conf  
   pm.status_path = /status
   sudo systemctl reload php7.0-fpm
@@ -3614,6 +3640,7 @@ https://www.tecmint.com/enable-monitor-php-fpm-status-in-nginx/
 
 ##  mysql  rank times
 ~~~
+出现次数 排行
 注意：此种rank  如果间隔出现  会重新统计   所以用了  把一组数据 放在临时表  或者 根据rank 字段 排序  
 
 SELECT 
@@ -4154,7 +4181,7 @@ GROUP by
 
 ## mysql group by speed  up 
 ~~~
-
+mysql  group  by  提速
 原始语句：
 select 
 	a.name, 
@@ -4259,7 +4286,7 @@ WHERE
 
 ## ANALYZE TABLE  
 ~~~
-
+大表 定时执行优化 （索引有时快有时慢等问题 ）
 large  table ,  执行优化
 ANALYZE TABLE company__third_party_clues_base_info ;
 
@@ -4267,6 +4294,7 @@ ANALYZE TABLE company__third_party_clues_base_info ;
 
 ## QUICK  DELETE 
 ~~~
+快速插入 删除   ：先禁用索引
 SET foreign_key_checks = 0;
 /* ... your query ... */
 SET foreign_key_checks = 1;
@@ -4306,6 +4334,8 @@ SELECT SLEEP(1);
 
 ##  display  cdn files with login
 ~~~
+登录后才可以展示图片/文件
+用需要登录的地址展示静态资源
      public function displayCdnFile($request, $response)
     {
 
@@ -4330,7 +4360,8 @@ SELECT SLEEP(1);
 
 ## KILL ALL AFTER GREP 
 ~~~
-while:关键词
+按关键词 杀掉进程 比如crontab 比如其他
+while:关键词 
 ps aux | grep while | grep -v grep | awk '{print $2}' | xargs kill
 
 
@@ -4339,6 +4370,7 @@ ps aux | grep while | grep -v grep | awk '{print $2}' | xargs kill
 
 ## locate
 ~~~
+定位文件位置
   locate nginx.conf
 
 ~~~
@@ -4357,7 +4389,7 @@ git config --global user.password "your password"
 
 ## mysql logger
 ~~~
-
+mysql 记录每次更新
 create  table  agreements_ad_history like  agreements;   
     DROP TRIGGER IF EXISTS agreements_ad_triggers ;
 
@@ -4785,8 +4817,9 @@ END $$
 
 ##  php upload lagre files 
 ~~~
-1: enable php configs 
-2: chunk  upload
+上传大文件
+1: enable php configs  改配置
+2: chunk  upload 拆分后上传
 
 example:   plupload  
 https://github.com/moxiecode/plupload 
@@ -4810,6 +4843,7 @@ $ph = new PluploadHandler(array(
 
 ##  php   memery   limit 
 ~~~ 
+内存使用 内存优化
 sample1:
             $model = new \model\AgreementsPaylog();  
             $rows = $model->fetchAll("SELECT 

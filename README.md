@@ -4781,3 +4781,28 @@ END $$
     
 ~~~ 
 
+
+
+##  php upload lagre files 
+~~~
+1: enable php configs 
+2: chunk  upload
+
+example:   plupload  
+https://github.com/moxiecode/plupload 
+
+注意配置：
+custom.html:
+    chunk_size: '2000kb', 设置为chunk上传   
+    max_retries: 3,
+
+    {title : "Mp3 files", extensions : "mp3"}   允许的文件类型
+
+upload.php 
+$ph = new PluploadHandler(array(
+	'target_dir' => 'uploads/', 配置保存文件的路径 注意是和custom.html同级
+	'allow_extensions' => 'jpg,jpeg,png,mp3' 允许的文件类型 此处用的mp3测试的  
+)); 
+
+~~~
+

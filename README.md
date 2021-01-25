@@ -1341,6 +1341,7 @@ new03 172.17.22.202 [var]$df -h
 new03 172.17.22.202 [var]$df -a
 
 new03 172.17.22.202 [var]$du -sh 
+new03 172.17.22.202 [var]$du -h * 
 
 find ./ -type f -size +1G
 find Downloads/ -type f -size +4G

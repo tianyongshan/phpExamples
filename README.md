@@ -4806,3 +4806,122 @@ $ph = new PluploadHandler(array(
 
 ~~~
 
+
+
+##  php   memery   limit 
+~~~ 
+sample1:
+            $model = new \model\AgreementsPaylog();  
+            $rows = $model->fetchAll("SELECT 
+                                    `ap`.* 
+                                FROM 
+                                    `agreements__paylog` `ap` 
+                                    LEFT JOIN agreements__order `a` ON `ap`.order_id = `a`.id 
+                                WHERE 
+                                    `a`.state = 0 
+                                    and `ap`.`state` = '0'
+                    "); 
+            
+            [已用34 MB]
+              
+                foreach ($rows as $paylogInfo){
+                    $tmp[$paylogInfo['order_id']] = $paylogInfo['order_id'];
+                    $paylogInfo['order_id'] &&   $ordersPaylogsInfos[$paylogInfo['order_id']][] = $paylogInfo; 
+                } 
+
+            [已用35 MB]
+
+                $departmentRs = \model\sales\Department::getSimpleAll();
+                  
+                $sales = $model_sales->fetchAll();
+                   
+                $allOrders = $orderModel->fetchAll('state=0');
+ 
+                $allAgs = $orderModel->fetchAll('state=0');
+            [已用330 MB]
+                foreach ($ordersPaylogsInfos as $order_id => $paylogInfoArr){ 
+                        $company = \model\Company::getEntityById($orderInfo['company_id']);
+                        
+                        $CommissionRs = \model\Commission::getByAgreementId($order_id); 
+                         
+                        $csmRe = $model_csm->fetchOne(
+                            [
+                                'state'=>0,
+                                'company_id'=>$orderInfo['company_id']
+                            ]);
+                        
+                        $csm_sales = \model\sales\Sales::getEntityById($csmRe->sales_id);
+                         
+                        foreach ($paylogInfoArr as $index_key => $paylogItem){ 
+                             
+                            $invoiceRs = \model\sales\SalesInvoice::getInfoByPayId(
+                                $paylogItem['id']
+                            );
+
+                            $invoiceLogData  = $invoiceLogModel->fetchOne(
+                                "invoice_id=".$invoiceRs['id'].
+                                " and state=0 and title='财务确认回款' 
+                                order by id desc limit 1"
+                            );   
+                    }
+                }
+            [已用450+ MB]
+
+
+sample2:
+
+            $model = new \model\AgreementsPaylog(); 
+            [不取任何都的数据 不存任何多余的数据]
+            $res = $model->fetchAll("SELECT 
+                                    paylog_info.id, 
+                                    paylog_info.order_id, 
+                                    order_info.order_type, 
+                                    order_info.agreement_no, 
+                                    order_info.create_time, 
+                                    order_info.money_total, 
+                                    order_info.year_num, 
+                                    paylog_info.pay_account, 
+                                    order_info.marketer_id, 
+                                    order_info.company_id, 
+                                    order_info.company_id, 
+                                    ag_info.money, 
+                                    order_info.agreement_cost, 
+                                    order_info.contract_subject, 
+                                    order_info.sign_type, 
+                                    'renew', 
+                                    order_info.sign_date, 
+                                    order_info.need_pm, 
+                                    order_info.money, 
+                                    paylog_info.department_id, 
+                                    paylog_info.department_id_other, 
+                                    paylog_info.pay_type, 
+                                    paylog_info.pay_event, 
+                                    paylog_info.money, 
+                                    paylog_info.pay_money, 
+                                    paylog_info.expect_date, 
+                                    '2021-01-25', 
+                                    'diff_day', 
+                                    'pay_date', 
+                                    'invoice_date', 
+                                    paylog_info.pay_tradeno, 
+                                    paylog_info.pay_des, 
+                                    'invoice_date', 
+                                    'money', 
+                                    'note', 
+                                    'admin_name', 
+                                    paylog_info.state, 
+                                    paylog_info.des, 
+                                    paylog_info.marketer_id_rollin, 
+                                    '%', 
+                                    'name', 
+                                    'rate' 
+                                FROM 
+                                    `agreements__paylog` paylog_info 
+                                    left JOIN agreements__order order_info ON `paylog_info`.order_id = `order_info`.id 
+                                    left JOIN agreements ag_info ON `paylog_info`.agreement_id = `ag_info`.id 
+                                WHERE 
+                                    `paylog_info`.state = 0 
+                                    and `paylog_info`.`state` = '0'"); 
+            [用32 MB]
+
+~~~ 

@@ -4959,3 +4959,14 @@ sample2:
             [用32 MB]
 
 ~~~ 
+
+
+## ideas
+~~~
+    大表排序：按 field1 排序
+
+    维护表：field1 排序表
+    id 是排序的顺序 
+    record_id 大表的id  
+    
+~~~

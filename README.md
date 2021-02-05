@@ -4361,10 +4361,9 @@ SELECT SLEEP(1);
 ## KILL ALL AFTER GREP 
 ~~~
 按关键词 杀掉进程 比如crontab 比如其他
-while:关键词 
-ps aux | grep while | grep -v grep | awk '{print $2}' | xargs kill
+while:关键词  
 ps -A | grep crontab | awk '{print $1}' | xargs kill -9 $1
-
+ps aux | grep -ie crontab | awk '{print $2}' | xargs kill -9 
 
 ~~~
 

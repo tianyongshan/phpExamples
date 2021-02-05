@@ -4363,6 +4363,7 @@ SELECT SLEEP(1);
 按关键词 杀掉进程 比如crontab 比如其他
 while:关键词 
 ps aux | grep while | grep -v grep | awk '{print $2}' | xargs kill
+ps -A | grep crontab | awk '{print $1}' | xargs kill -9 $1
 
 
 ~~~
@@ -4968,5 +4969,7 @@ sample2:
     维护表：field1 排序表
     id 是排序的顺序 
     record_id 大表的id  
-    
+
 ~~~
+
+

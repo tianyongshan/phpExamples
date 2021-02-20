@@ -4992,3 +4992,84 @@ php-fpm7. 10201             33    0u     unix 0xffff880037194800      0t0      1
 
 
 ~~~
+
+
+## 监控 DB  
+~~~
+/**
+
+     http://testadmin.aibangmang.org/?_c=newtest2&_a=autoKill
+     http://admin2018.aibangmang.org/?_c=newtest2&_a=autoKill
+     CREATE TABLE `db_stock_info` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`details` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+	`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`update_time` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`)
+    ) ENGINE = MyISAM DEFAULT CHARSET = utf8 COLLATE = utf8_unicode_ci COMMENT = '记录数据库拥堵'
+ */
+public function autoKill($request, $response)
+{
+
+	$model = new \model\Company();
+	$allLists = $model->query("SHOW FULL PROCESSLIST", true);
+
+	// 连接数
+	$nums = 0;
+	// 详细信息
+	$infoArr = [];
+	foreach ($allLists as $row) {
+		$tmp = [
+			'语句' => $row['Info'],
+			'当前状态' => $row['Command'] . ' ' . $row['State'],
+			'用时' => $row['Time'],
+			'id' => $row['Id'],
+		];
+		$infoArr[] = $tmp;
+		var_dump($tmp);
+		$nums ++ ;
+
+	}
+
+	if( $nums>=20){
+		foreach ($allLists as $row) {
+			// 超过6秒的干掉
+			if ($row['Time']>=5) {
+				$res = $model->query("KILL {$row['Id']}", true);
+
+			}
+
+		}
+
+		$model->query("INSERT INTO
+			db_stock_info
+			( `details`)
+			VALUES (
+				'".json_encode($infoArr)."'
+			)
+			");
+	}
+
+}
+
+
+~~~
+
+
+## 监控 请求 (代码层面)  
+~~~
+trace table  
+
+入口 生成唯一 id（主键id） 
+进入 action 添加到表 （记录pid 方便速查|如果有status?full就不用记录）
+action 结束  更新表 
+如果时间小于10秒 ，按照id删除记录  
+
+
+查看当前的进程： 直接查 
+查看慢的进程：直接查
+ 
+
+~~~
+
+

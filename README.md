@@ -4972,3 +4972,23 @@ sample2:
 ~~~
 
 
+
+## lsof -ln  展示当前运行的PHP
+~~~
+
+查询正在运行的PHP脚本：
+（不用satus?full的话）
+
+lsof -ln |grep php
+先找到在用的PHP版本
+
+lsof -ln |grep 'php7.0'
+php-fpm7.  1395              0    2w      REG              253,1      425     114978 /var/log/php7.0-fpm.log
+php-fpm7.  1395              0    5w      REG              253,1      425     114978 /var/log/php7.0-fpm.log
+php-fpm7.  1395              0    8u     unix 0xffff880037194800      0t0      16645 /run/php/php7.0-fpm.sock type=STREAM
+php-fpm7.  1403             33    0u     unix 0xffff880037194800      0t0      16645 /run/php/php7.0-fpm.sock type=STREAM
+php-fpm7.  9918             33    0u     unix 0xffff880037194800      0t0      16645 /run/php/php7.0-fpm.sock type=STREAM
+php-fpm7. 10201             33    0u     unix 0xffff880037194800      0t0      16645 /run/php/php7.0-fpm.sock type=STREAM
+
+
+~~~

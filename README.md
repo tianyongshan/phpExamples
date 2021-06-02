@@ -5081,7 +5081,36 @@ action 结束  更新表
 
 ~~~
 
+## mysql 简单查询 却很耗时
+~~~
+    明明简单的语句 就是执行了好几十秒
+     select * from `regulater__sign` 
+        where 
+            1 and 
+            user_id in (
+                    select 
+                        id 
+                    from 
+                        member 
+                    where 
+                        real_mobile = '胡海云' or name = '胡海云'
+                    ) 
+        ORDER BY sign_date DESC,sign_time DESC 
+        limit 0, 20 ;
 
+        EXPLAIN ; 
+                
+        1	SIMPLE	member	NULL	ALL	PRIMARY,real_mobile	NULL	NULL	NULL	11713	19.00	Using where; Using temporary; Using filesort
+        1	SIMPLE	regulater__sign	NULL	ref	user_id	user_id	4	aibangmang.member.id	147	100.00	NULL
+
+
+        explain 之后 也用到索引  扫描行数也少  就是需要二三十秒 
+     
+        重建索引 OPTIMIZE TABLE `regulater__sign`
+        
+
+
+~~~
 
 
 
